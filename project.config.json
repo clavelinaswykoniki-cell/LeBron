@@ -1,0 +1,15 @@
+{
+  "description": "詹姆斯黑粉观点反驳器本地小程序原型",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true
+  },
+  "compileType": "miniprogram",
+  "libVersion": "latest",
+  "appid": "touristappid",
+  "projectname": "lebron-rebuttal-miniapp",
+  "miniprogramRoot": "miniprogram/"
+}

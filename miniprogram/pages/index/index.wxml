@@ -1,0 +1,82 @@
+<view class="safe-area page">
+  <view class="hero">
+    <view class="eyebrow">LEBRON REBUTTAL ENGINE</view>
+    <view class="title">詹黑逻辑拆解器</view>
+    <view class="subtitle">输入黑点、黑称或球星对比，自动命中反驳卡。</view>
+  </view>
+
+  <view class="panel card">
+    <textarea
+      class="query-input"
+      placeholder="例如：8分 / 米奇冠军 / 科比五冠 / Excel球王 / 老张跑路"
+      value="{{query}}"
+      bindinput="onInput"
+      maxlength="120"
+      auto-height
+    />
+    <view class="actions">
+      <button class="primary-btn" bindtap="onGenerate">生成反驳</button>
+      <button class="ghost-btn" bindtap="onRandom">随机一条</button>
+    </view>
+  </view>
+
+  <view class="quick">
+    <view
+      wx:for="{{quickInputs}}"
+      wx:key="*this"
+      class="quick-chip"
+      data-value="{{item}}"
+      bindtap="onQuickTap"
+    >{{item}}</view>
+  </view>
+
+  <view wx:if="{{results.length}}" class="results">
+    <view class="result-count">命中 {{results.length}} 张反驳卡</view>
+    <view wx:for="{{results}}" wx:key="card.id" class="result-card card">
+      <view class="meta-row">
+        <text class="category">{{item.category}}</text>
+        <text class="alias">命中：{{item.alias}}</text>
+      </view>
+      <view class="claim">{{item.card.claim}}</view>
+
+      <view class="section">
+        <view class="section-title">简短版</view>
+        <view class="reply">{{item.card.short_reply}}</view>
+        <button class="copy-btn" data-text="{{item.card.short_reply}}" bindtap="copyText">复制</button>
+      </view>
+
+      <view class="section">
+        <view class="section-title">逻辑版</view>
+        <view class="reply">{{item.card.long_reply}}</view>
+        <button class="copy-btn" data-text="{{item.card.long_reply}}" bindtap="copyText">复制</button>
+      </view>
+
+      <view class="section compact">
+        <view class="section-title">一句话反击</view>
+        <view class="one-liner">{{item.card.one_liner}}</view>
+        <button class="copy-btn" data-text="{{item.card.one_liner}}" bindtap="copyText">复制</button>
+      </view>
+
+      <view class="section">
+        <view class="section-title">视频口播版</view>
+        <view class="reply">{{item.card.video_script}}</view>
+        <button class="copy-btn" data-text="{{item.card.video_script}}" bindtap="copyText">复制</button>
+      </view>
+
+      <view class="logic-grid">
+        <view class="logic-item">
+          <view class="logic-label">可承认事实</view>
+          <view class="logic-text">{{item.card.valid_part}}</view>
+        </view>
+        <view class="logic-item">
+          <view class="logic-label">逻辑漏洞</view>
+          <view class="logic-text">{{item.card.logic_flaw}}</view>
+        </view>
+        <view class="logic-item wide">
+          <view class="logic-label">同标准对比</view>
+          <view class="logic-text">{{item.card.comparison}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

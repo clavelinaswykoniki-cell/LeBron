@@ -1,0 +1,6 @@
+<view class="safe-area">
+  <view class="card placeholder">
+    <view class="title">反驳详情页预留</view>
+    <view class="text">第一版集中在首页完成搜索、匹配、展示和复制。后续接 DeepSeek/豆包后再拆详情页。</view>
+  </view>
+</view>
