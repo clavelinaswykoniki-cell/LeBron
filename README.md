@@ -28,10 +28,20 @@ DeepSeek/豆包 API Key 不能放在小程序前端。后续通过 CloudBase 云
 - `miniprogram/data/aliases.js`: 评论区短词、黑称、梗到反驳卡的映射。
 - `miniprogram/data/rebuttal_cards.js`: 第一版 20 条本地反驳卡。
 - `miniprogram/data/player_comparisons.js`: 同标准横向对比对象。
+- `miniprogram/data/factual_sources.js`: 后续 RAG/模型调用使用的事实来源卡。
+- `miniprogram/data/rebuttal_templates.js`: 后续模型生成使用的回复结构模板。
 - `miniprogram/utils/normalizeQuery.js`: 用户输入归一化。
 - `miniprogram/utils/matchQuery.js`: 本地模糊匹配和 fallback。
 - `miniprogram/utils/promptBuilder.js`: 后续接 DeepSeek/豆包时的 prompt 组装占位。
 - `miniprogram/pages/index/*`: 首页搜索、生成、展示、复制。
+- `scripts/test-match.js`: 本地关键词命中测试。
+
+## 本地检查
+
+```bash
+npm run check:syntax
+npm run test:match
+```
 
 ## 测试词
 

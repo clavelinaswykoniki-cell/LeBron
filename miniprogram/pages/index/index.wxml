@@ -39,6 +39,10 @@
       </view>
       <view class="claim">{{item.card.claim}}</view>
 
+      <view wx:if="{{item.card.tags.length}}" class="tags">
+        <text wx:for="{{item.card.tags}}" wx:key="*this" class="tag">{{item}}</text>
+      </view>
+
       <view class="section">
         <view class="section-title">简短版</view>
         <view class="reply">{{item.card.short_reply}}</view>
@@ -76,6 +80,11 @@
           <view class="logic-label">同标准对比</view>
           <view class="logic-text">{{item.card.comparison}}</view>
         </view>
+      </view>
+
+      <view wx:if="{{item.card.facts.length}}" class="facts">
+        <view class="facts-title">事实点</view>
+        <view wx:for="{{item.card.facts}}" wx:key="*this" class="fact-row">• {{item}}</view>
       </view>
     </view>
   </view>
