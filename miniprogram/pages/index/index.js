@@ -1,5 +1,7 @@
 const { matchQuery, randomCard } = require("../../utils/matchQuery")
+const { generateEnhancedReply } = require("../../utils/llmProvider")
 const arsenal = require("../../data/arsenal")
+const corePositions = require("../../data/core_positions")
 
 const allCards = arsenal.cards
 
@@ -56,6 +58,15 @@ function buildCardText(item) {
   ].join("\n")
 }
 
+function pickReplyFields(card) {
+  return {
+    short_reply: card.short_reply,
+    long_reply: card.long_reply,
+    one_liner: card.one_liner,
+    video_script: card.video_script
+  }
+}
+
 Page({
   data: {
     query: "",
@@ -65,6 +76,7 @@ Page({
       aliases: arsenal.aliases.length
     },
     categoryFilters: buildCategoryFilters(),
+    enhancedLoadingMap: {},
     allResults: [],
     filteredResults: [],
     results: [],
@@ -96,6 +108,41 @@ Page({
       allResults: filteredResults,
       filteredResults,
       results: filteredResults
+    })
+  },
+
+  setEnhanceLoading(resultKey, loading) {
+    const loadingMap = {
+      ...this.data.enhancedLoadingMap,
+      [resultKey]: loading
+    }
+    const markLoading = (item) => item.resultKey === resultKey
+      ? { ...item, isEnhancing: loading }
+      : item
+    this.setData({
+      enhancedLoadingMap: loadingMap,
+      allResults: this.data.allResults.map(markLoading),
+      filteredResults: this.data.filteredResults.map(markLoading),
+      results: this.data.results.map(markLoading)
+    })
+  },
+
+  mergeEnhancedReply(resultKey, reply) {
+    const mergeItem = (item) => {
+      if (item.resultKey !== resultKey) return item
+      return {
+        ...item,
+        localReply: item.localReply || pickReplyFields(item.card),
+        card: {
+          ...item.card,
+          ...reply
+        }
+      }
+    }
+    this.setData({
+      allResults: this.data.allResults.map(mergeItem),
+      filteredResults: this.data.filteredResults.map(mergeItem),
+      results: this.data.results.map(mergeItem)
     })
   },
 
@@ -135,6 +182,28 @@ Page({
         wx.showToast({ title: "已复制", icon: "success" })
       }
     })
+  },
+
+  async onEnhanceReply(event) {
+    const index = Number(event.currentTarget.dataset.index)
+    const item = this.data.filteredResults[index]
+    if (!item || item.isEnhancing) return
+
+    this.setEnhanceLoading(item.resultKey, true)
+    const reply = await generateEnhancedReply({
+      userQuery: this.data.query,
+      matchedCard: item.card,
+      corePosition: corePositions.stance
+    })
+    this.setEnhanceLoading(item.resultKey, false)
+
+    if (!reply) {
+      wx.showToast({ title: "AI暂不可用", icon: "none" })
+      return
+    }
+
+    this.mergeEnhancedReply(item.resultKey, reply)
+    wx.showToast({ title: "已增强", icon: "success" })
   },
 
   copyCard(event) {

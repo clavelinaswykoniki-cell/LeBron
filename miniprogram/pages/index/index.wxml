@@ -72,7 +72,15 @@
           <text class="category">{{item.category}}</text>
           <text class="alias">命中：{{item.alias}}</text>
         </view>
-        <button class="copy-card-btn" data-index="{{index}}" bindtap="copyCard">复制整张</button>
+        <view class="card-actions">
+          <button
+            class="enhance-btn"
+            data-index="{{index}}"
+            bindtap="onEnhanceReply"
+            disabled="{{item.isEnhancing}}"
+          >{{item.isEnhancing ? '生成中' : 'AI增强'}}</button>
+          <button class="copy-card-btn" data-index="{{index}}" bindtap="copyCard">复制整张</button>
+        </view>
       </view>
       <view class="claim">{{item.card.claim}}</view>
 
