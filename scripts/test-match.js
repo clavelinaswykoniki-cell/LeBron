@@ -1,10 +1,8 @@
 const { matchQuery } = require("../miniprogram/utils/matchQuery")
-const baseCards = require("../miniprogram/data/rebuttal_cards")
-const extraCards = require("../miniprogram/data/rebuttal_cards_extra")
-const aliases = require("../miniprogram/data/aliases")
+const arsenal = require("../miniprogram/data/arsenal")
 const categories = require("../miniprogram/data/categories")
 
-const cards = baseCards.concat(extraCards)
+const { cards, aliases } = arsenal
 
 const queries = [
   "8分",
@@ -49,6 +47,32 @@ const queries = [
   "魔术师比詹姆斯强",
   "伯德比詹姆斯强",
   "贾巴尔比詹姆斯强",
+  "8分释兵权",
+  "演韦德",
+  "输给单核小牛",
+  "抱团冠军",
+  "跨人禁赛",
+  "四水冠",
+  "缩水冠军",
+  "4胜6负",
+  "亚军没用",
+  "被勇士横扫",
+  "抱团鼻祖",
+  "游牧詹",
+  "错峰詹",
+  "垃圾时间詹",
+  "Excel詹",
+  "端尿盆",
+  "没中投",
+  "背身不行",
+  "甩锅詹",
+  "怕背锅",
+  "摊手詹",
+  "叉腰詹",
+  "目送詹",
+  "防守划水",
+  "甩锅队友",
+  "不如约基奇单核夺冠",
   "未知黑点"
 ]
 

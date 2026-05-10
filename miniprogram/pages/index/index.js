@@ -1,9 +1,7 @@
 const { matchQuery, randomCard } = require("../../utils/matchQuery")
-const baseCards = require("../../data/rebuttal_cards")
-const extraCards = require("../../data/rebuttal_cards_extra")
-const aliases = require("../../data/aliases")
+const arsenal = require("../../data/arsenal")
 
-const allCards = baseCards.concat(extraCards)
+const allCards = arsenal.cards
 
 function buildCategoryFilters() {
   const seen = {}
@@ -64,7 +62,7 @@ Page({
     activeCategory: "全部",
     arsenalStats: {
       cards: allCards.length,
-      aliases: aliases.length
+      aliases: arsenal.aliases.length
     },
     categoryFilters: buildCategoryFilters(),
     allResults: [],

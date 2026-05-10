@@ -1,10 +1,8 @@
-const aliases = require("../data/aliases")
-const baseCards = require("../data/rebuttal_cards")
-const extraCards = require("../data/rebuttal_cards_extra")
+const arsenal = require("../data/arsenal")
 const categories = require("../data/categories")
 const { normalizeQuery } = require("./normalizeQuery")
 
-const cards = baseCards.concat(extraCards)
+const { aliases, cards } = arsenal
 
 function fallbackCard(input) {
   return {
@@ -85,7 +83,7 @@ function matchQuery(input) {
         : null
       return {
         alias: alias.alias,
-        category: category ? category.name : alias.categoryId,
+        category: category ? category.name : (card ? card.category : alias.categoryId),
         categoryId: alias.categoryId,
         priority: alias.priority,
         card: card || (category ? categoryFallback(category, input) : fallbackCard(input))

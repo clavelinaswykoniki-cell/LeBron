@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "test:match": "node scripts/test-match.js",
-    "check:syntax": "node -e \"require('./miniprogram/data/categories'); require('./miniprogram/data/aliases'); require('./miniprogram/data/rebuttal_cards'); require('./miniprogram/data/factual_sources'); require('./miniprogram/data/rebuttal_templates'); require('./miniprogram/utils/matchQuery'); require('./miniprogram/utils/promptBuilder'); console.log('syntax ok')\" && node -c cloudfunctions/generateReply/index.js"
+    "test:corpus": "node scripts/test-corpus-integrity.js",
+    "check:syntax": "node -e \"require('./miniprogram/data/categories'); require('./miniprogram/data/aliases'); require('./miniprogram/data/aliases_docx'); require('./miniprogram/data/rebuttal_cards'); require('./miniprogram/data/rebuttal_cards_docx'); require('./miniprogram/data/arsenal'); require('./miniprogram/data/factual_sources'); require('./miniprogram/data/rebuttal_templates'); require('./miniprogram/utils/matchQuery'); require('./miniprogram/utils/promptBuilder'); console.log('syntax ok')\" && node -c cloudfunctions/generateReply/index.js && node -c scripts/convert-docx-corpus.js && node -c scripts/test-corpus-integrity.js"
   }
 }
