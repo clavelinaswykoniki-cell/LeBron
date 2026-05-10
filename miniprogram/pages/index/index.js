@@ -22,6 +22,7 @@ function buildCategoryFilters() {
 
 function wrapCard(card, alias) {
   return {
+    resultKey: card.id,
     alias,
     category: card.category,
     priority: 1,
@@ -29,9 +30,11 @@ function wrapCard(card, alias) {
   }
 }
 
-function filterResults(results, category) {
-  if (!category || category === "全部") return results
-  return results.filter((item) => item.category === category || item.card.category === category)
+function normalizeResults(results) {
+  return results.map((item, index) => ({
+    resultKey: item.resultKey || (item.card && item.card.id) || `${item.category || "result"}_${index}`,
+    ...item
+  }))
 }
 
 function buildCardText(item) {
@@ -89,10 +92,10 @@ Page({
 
   applyResults(results, category) {
     const activeCategory = category || this.data.activeCategory || "全部"
-    const filteredResults = filterResults(results, activeCategory)
+    const filteredResults = normalizeResults(results)
     this.setData({
       activeCategory,
-      allResults: results,
+      allResults: filteredResults,
       filteredResults,
       results: filteredResults
     })
@@ -114,15 +117,8 @@ Page({
 
   onCategoryTap(event) {
     const category = event.currentTarget.dataset.category
-    if (category === "全部") {
-      const results = this.data.query ? matchQuery(this.data.query) : matchQuery("8分")
-      this.applyResults(results, "全部")
-      return
-    }
-
     const cards = allCards
-      .filter((card) => card.category === category)
-      .slice(0, 8)
+      .filter((card) => category === "全部" || card.category === category)
       .map((card) => wrapCard(card, "分类筛选"))
     this.applyResults(cards, category)
   },

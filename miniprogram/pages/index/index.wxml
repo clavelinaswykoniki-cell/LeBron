@@ -66,7 +66,7 @@
   </view>
 
   <view wx:if="{{results.length}}" class="results">
-    <view wx:for="{{results}}" wx:key="card.id" class="result-card">
+    <view wx:for="{{results}}" wx:key="resultKey" class="result-card">
       <view class="meta-row">
         <view>
           <text class="category">{{item.category}}</text>
