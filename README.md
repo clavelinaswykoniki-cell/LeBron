@@ -21,7 +21,7 @@
 
 ## 后续接入
 
-DeepSeek/豆包 API Key 不能放在小程序前端。后续通过 CloudBase 云函数转发调用。
+DeepSeek API Key 不能放在小程序前端。后续通过 CloudBase 云函数转发调用，默认模型使用 `deepseek-v4-pro`。
 
 ## 文件作用
 
@@ -37,6 +37,7 @@ DeepSeek/豆包 API Key 不能放在小程序前端。后续通过 CloudBase 云
 - `miniprogram/utils/matchQuery.js`: 本地模糊匹配和 fallback。
 - `miniprogram/utils/promptBuilder.js`: 后续接 DeepSeek/豆包时的 prompt 组装占位。
 - `miniprogram/pages/index/*`: 首页搜索、生成、展示、复制。
+- `cloudfunctions/generateReply/*`: CloudBase 调 DeepSeek v4 pro 的云函数结构，不包含真实 API Key。
 - `scripts/test-match.js`: 本地关键词命中测试。
 
 ## 本地检查

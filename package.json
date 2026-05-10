@@ -4,6 +4,6 @@
   "private": true,
   "scripts": {
     "test:match": "node scripts/test-match.js",
-    "check:syntax": "node -e \"require('./miniprogram/data/categories'); require('./miniprogram/data/aliases'); require('./miniprogram/data/rebuttal_cards'); require('./miniprogram/data/factual_sources'); require('./miniprogram/data/rebuttal_templates'); require('./miniprogram/utils/matchQuery'); require('./miniprogram/utils/promptBuilder'); console.log('syntax ok')\""
+    "check:syntax": "node -e \"require('./miniprogram/data/categories'); require('./miniprogram/data/aliases'); require('./miniprogram/data/rebuttal_cards'); require('./miniprogram/data/factual_sources'); require('./miniprogram/data/rebuttal_templates'); require('./miniprogram/utils/matchQuery'); require('./miniprogram/utils/promptBuilder'); console.log('syntax ok')\" && node -c cloudfunctions/generateReply/index.js"
   }
 }

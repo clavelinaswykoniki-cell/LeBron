@@ -8,7 +8,7 @@
 miniprogram
   -> wx.cloud.callFunction("generateReply")
 cloudfunctions/generateReply
-  -> DeepSeek / 豆包 API
+  -> DeepSeek v4 pro API
 ```
 
 ## 云函数输入
@@ -37,7 +37,9 @@ cloudfunctions/generateReply
 - 不要把全部语料塞进 prompt。
 - 只发送用户输入、命中的反驳卡、必要核心立场。
 - API Key 放 CloudBase 环境变量，例如 `DEEPSEEK_API_KEY`。
-- 模型可先用 `deepseek-v4-flash`，后续按效果切到 `deepseek-v4-pro`。
+- 模型默认使用 `deepseek-v4-pro`，不再考虑 `deepseek-v4-flash`。
+- 真实 API Key 只能配置到 CloudBase 云函数环境变量 `DEEPSEEK_API_KEY`。
+- 可选环境变量：`DEEPSEEK_BASE_URL=https://api.deepseek.com`、`DEEPSEEK_MODEL=deepseek-v4-pro`、`DEEPSEEK_THINKING=disabled`。
 
 ## 安全边界
 

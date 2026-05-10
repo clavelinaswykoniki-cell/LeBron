@@ -11,5 +11,6 @@
   "libVersion": "latest",
   "appid": "touristappid",
   "projectname": "lebron-rebuttal-miniapp",
-  "miniprogramRoot": "miniprogram/"
+  "miniprogramRoot": "miniprogram/",
+  "cloudfunctionRoot": "cloudfunctions/"
 }
