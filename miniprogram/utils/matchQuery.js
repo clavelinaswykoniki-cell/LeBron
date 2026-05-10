@@ -48,6 +48,10 @@ function uniqueByCardId(items) {
 }
 
 function removeNoisyFallbacks(items) {
+  const hasExactCard = items.some((item) => !String(item.card.id).endsWith("_fallback"))
+  if (hasExactCard) {
+    return items.filter((item) => !String(item.card.id).endsWith("_fallback"))
+  }
   const categoriesWithExactCard = {}
   items.forEach((item) => {
     if (!String(item.card.id).endsWith("_fallback")) {
