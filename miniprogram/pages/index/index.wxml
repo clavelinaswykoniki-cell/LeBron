@@ -1,11 +1,22 @@
 <view class="safe-area page">
   <view class="hero">
-    <view class="eyebrow">LEBRON REBUTTAL ENGINE</view>
-    <view class="title">詹黑逻辑拆解器</view>
-    <view class="subtitle">输入黑点、黑称或球星对比，自动命中反驳卡。</view>
+    <view>
+      <view class="eyebrow">COMMENT WAR ROOM</view>
+      <view class="title">詹黑逻辑拆解器</view>
+      <view class="subtitle">输入黑点、黑称或球星对比，直接拉出可复制弹药。</view>
+    </view>
+    <view class="arsenal">
+      <view class="arsenal-num">{{arsenalStats.cards}}</view>
+      <view class="arsenal-label">反驳卡</view>
+      <view class="arsenal-sub">{{arsenalStats.aliases}} 个短词命中</view>
+    </view>
   </view>
 
-  <view class="panel card">
+  <view class="panel">
+    <view class="panel-head">
+      <view class="panel-title">作战输入</view>
+      <view class="panel-note">短词、黑称、整句都能搜</view>
+    </view>
     <textarea
       class="query-input"
       placeholder="例如：8分 / 米奇冠军 / 科比五冠 / Excel球王 / 老张跑路"
@@ -20,7 +31,9 @@
     </view>
   </view>
 
-  <view class="quick">
+  <view class="quick-section">
+    <view class="tool-title">高频黑点</view>
+    <view class="quick">
     <view
       wx:for="{{quickInputs}}"
       wx:key="*this"
@@ -28,14 +41,38 @@
       data-value="{{item}}"
       bindtap="onQuickTap"
     >{{item}}</view>
+    </view>
+  </view>
+
+  <scroll-view class="category-scroll" scroll-x enable-flex>
+    <view
+      wx:for="{{categoryFilters}}"
+      wx:key="name"
+      class="category-chip {{activeCategory === item.name ? 'active' : ''}}"
+      data-category="{{item.name}}"
+      bindtap="onCategoryTap"
+    >
+      <text>{{item.name}}</text>
+      <text class="category-count">{{item.count}}</text>
+    </view>
+  </scroll-view>
+
+  <view wx:if="{{results.length}}" class="toolbar">
+    <view>
+      <view class="toolbar-title">命中 {{results.length}} 张弹药卡</view>
+      <view class="toolbar-sub">当前分类：{{activeCategory}}</view>
+    </view>
+    <button class="copy-all-btn" bindtap="copyAll">复制全部</button>
   </view>
 
   <view wx:if="{{results.length}}" class="results">
-    <view class="result-count">命中 {{results.length}} 张反驳卡</view>
-    <view wx:for="{{results}}" wx:key="card.id" class="result-card card">
+    <view wx:for="{{results}}" wx:key="card.id" class="result-card">
       <view class="meta-row">
-        <text class="category">{{item.category}}</text>
-        <text class="alias">命中：{{item.alias}}</text>
+        <view>
+          <text class="category">{{item.category}}</text>
+          <text class="alias">命中：{{item.alias}}</text>
+        </view>
+        <button class="copy-card-btn" data-index="{{index}}" bindtap="copyCard">复制整张</button>
       </view>
       <view class="claim">{{item.card.claim}}</view>
 
@@ -44,25 +81,25 @@
       </view>
 
       <view class="section">
-        <view class="section-title">简短版</view>
+        <view class="section-title">评论区短刀</view>
         <view class="reply">{{item.card.short_reply}}</view>
         <button class="copy-btn" data-text="{{item.card.short_reply}}" bindtap="copyText">复制</button>
       </view>
 
       <view class="section">
-        <view class="section-title">逻辑版</view>
+        <view class="section-title">长线拆解</view>
         <view class="reply">{{item.card.long_reply}}</view>
         <button class="copy-btn" data-text="{{item.card.long_reply}}" bindtap="copyText">复制</button>
       </view>
 
       <view class="section compact">
-        <view class="section-title">一句话反击</view>
+        <view class="section-title">一句话封口</view>
         <view class="one-liner">{{item.card.one_liner}}</view>
         <button class="copy-btn" data-text="{{item.card.one_liner}}" bindtap="copyText">复制</button>
       </view>
 
       <view class="section">
-        <view class="section-title">视频口播版</view>
+        <view class="section-title">口播弹药</view>
         <view class="reply">{{item.card.video_script}}</view>
         <button class="copy-btn" data-text="{{item.card.video_script}}" bindtap="copyText">复制</button>
       </view>
@@ -87,5 +124,10 @@
         <view wx:for="{{item.card.facts}}" wx:key="*this" class="fact-row">• {{item}}</view>
       </view>
     </view>
+  </view>
+
+  <view wx:else class="empty-state">
+    <view class="empty-title">没有命中当前分类</view>
+    <view class="empty-sub">切回“全部”，或换一个黑点继续搜。</view>
   </view>
 </view>
