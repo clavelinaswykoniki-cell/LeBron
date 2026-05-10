@@ -1,7 +1,10 @@
 const aliases = require("../data/aliases")
-const cards = require("../data/rebuttal_cards")
+const baseCards = require("../data/rebuttal_cards")
+const extraCards = require("../data/rebuttal_cards_extra")
 const categories = require("../data/categories")
 const { normalizeQuery } = require("./normalizeQuery")
+
+const cards = baseCards.concat(extraCards)
 
 function fallbackCard(input) {
   return {

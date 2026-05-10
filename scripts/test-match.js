@@ -1,7 +1,10 @@
 const { matchQuery } = require("../miniprogram/utils/matchQuery")
-const cards = require("../miniprogram/data/rebuttal_cards")
+const baseCards = require("../miniprogram/data/rebuttal_cards")
+const extraCards = require("../miniprogram/data/rebuttal_cards_extra")
 const aliases = require("../miniprogram/data/aliases")
 const categories = require("../miniprogram/data/categories")
+
+const cards = baseCards.concat(extraCards)
 
 const queries = [
   "8分",
@@ -31,6 +34,21 @@ const queries = [
   "历史第二十",
   "奥尼尔统治力",
   "文班未来超詹",
+  "乔丹没抢七",
+  "乔丹十个得分王",
+  "科比一人一城",
+  "曼巴精神",
+  "库里全票MVP",
+  "库里无杜冠军",
+  "邓肯低调",
+  "邓肯马刺体系",
+  "杜兰特单挑",
+  "死神杜",
+  "约基奇组织",
+  "约基奇效率",
+  "魔术师比詹姆斯强",
+  "伯德比詹姆斯强",
+  "贾巴尔比詹姆斯强",
   "未知黑点"
 ]
 

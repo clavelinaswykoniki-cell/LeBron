@@ -1,4 +1,5 @@
 const categories = require("./categories")
+const extraAliases = require("./aliases_extra")
 
 const manualAliases = [
   { alias: "老张8分", categoryId: "category_2011_finals", targetId: "black_2011_8_points", priority: 120 },
@@ -92,4 +93,4 @@ const categoryAliases = categories.flatMap((category) => {
   }))
 })
 
-module.exports = manualAliases.concat(categoryAliases)
+module.exports = manualAliases.concat(categoryAliases).concat(extraAliases)
