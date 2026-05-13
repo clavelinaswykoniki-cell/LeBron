@@ -67,6 +67,19 @@ function pickReplyFields(card) {
   }
 }
 
+function copyToClipboard(text, title) {
+  if (!text) {
+    wx.showToast({ title: "没有可复制内容", icon: "none" })
+    return
+  }
+  wx.setClipboardData({
+    data: text,
+    success: () => {
+      wx.showToast({ title, icon: "success" })
+    }
+  })
+}
+
 Page({
   data: {
     query: "",
@@ -80,11 +93,30 @@ Page({
     allResults: [],
     filteredResults: [],
     results: [],
+    isCategoryFiltered: false,
+    activeMood: "short_reply",
+    activeMoodLabel: "热梗开打",
+    moodTabs: [
+      { id: "short_reply", name: "热梗开打", field: "short_reply", icon: "thunder" },
+      { id: "one_liner", name: "一键复制", field: "one_liner", icon: "copy" },
+      { id: "video_script", name: "口播上墙", field: "video_script", icon: "sound" },
+      { id: "long_reply", name: "长逻辑压制", field: "long_reply", icon: "chat" }
+    ],
+    hotBattles: [
+      { label: "8分释兵权", query: "8分释兵权", tone: "经典硬仗" },
+      { label: "米奇冠军", query: "米奇冠军", tone: "冠军含金量" },
+      { label: "靠身体没技术", query: "靠身体", tone: "技术审美" },
+      { label: "Excel球王", query: "Excel詹", tone: "数据刷子" },
+      { label: "跑路抱团", query: "跑路詹", tone: "生涯选择" },
+      { label: "库里压詹", query: "库里改变篮球", tone: "球星对比" }
+    ],
     quickInputs: [
       "8分",
       "米奇冠军",
       "科比五冠",
       "Excel球王",
+      "废队友",
+      "不会投篮",
       "老张跑路",
       "摊皇不回防",
       "库里改变篮球",
@@ -93,21 +125,32 @@ Page({
   },
 
   onLoad() {
-    this.applyResults(matchQuery("8分"), "全部")
+    this.setSearchResults(matchQuery("8分"))
   },
 
   onInput(event) {
     this.setData({ query: event.detail.value })
   },
 
+  setSearchResults(results) {
+    const normalized = normalizeResults(results)
+    this.setData({
+      activeCategory: "全部",
+      isCategoryFiltered: false,
+      allResults: normalized,
+      filteredResults: normalized,
+      results: normalized
+    })
+  },
+
   applyResults(results, category) {
     const activeCategory = category || this.data.activeCategory || "全部"
-    const filteredResults = normalizeResults(results)
+    const normalized = normalizeResults(results)
     this.setData({
       activeCategory,
-      allResults: filteredResults,
-      filteredResults,
-      results: filteredResults
+      isCategoryFiltered: activeCategory !== "全部",
+      filteredResults: normalized,
+      results: normalized
     })
   },
 
@@ -147,41 +190,75 @@ Page({
   },
 
   onGenerate() {
-    const results = matchQuery(this.data.query)
-    this.applyResults(results, "全部")
+    this.setSearchResults(matchQuery(this.data.query))
   },
 
   onQuickTap(event) {
     const value = event.currentTarget.dataset.value
-    const results = matchQuery(value)
-    this.setData({
-      query: value
-    })
-    this.applyResults(results, "全部")
+    this.setData({ query: value })
+    this.setSearchResults(matchQuery(value))
   },
 
   onCategoryTap(event) {
     const category = event.currentTarget.dataset.category
+    if (category === "全部") {
+      this.applyResults(this.data.allResults, "全部")
+      return
+    }
     const cards = allCards
-      .filter((card) => category === "全部" || card.category === category)
+      .filter((card) => card.category === category)
       .map((card) => wrapCard(card, "分类筛选"))
     this.applyResults(cards, category)
+  },
+
+  onMoodTap(event) {
+    const mood = event.currentTarget.dataset.mood
+    if (!mood) return
+    const tab = this.data.moodTabs.find((item) => item.id === mood)
+    this.setData({
+      activeMood: mood,
+      activeMoodLabel: tab ? tab.name : mood
+    })
+  },
+
+  onHotBattleTap(event) {
+    const value = event.currentTarget.dataset.value
+    this.setData({
+      query: value,
+      activeMood: "short_reply",
+      activeMoodLabel: "热梗开打"
+    })
+    this.setSearchResults(matchQuery(value))
+  },
+
+  onClearCategory() {
+    this.applyResults(this.data.allResults, "全部")
   },
 
   onRandom() {
     const card = randomCard()
     this.setData({ query: card.tags && card.tags.length ? card.tags[0] : card.category })
-    this.applyResults([wrapCard(card, "随机")], "全部")
+    this.setSearchResults([wrapCard(card, "随机")])
   },
 
   copyText(event) {
     const text = event.currentTarget.dataset.text || ""
-    wx.setClipboardData({
-      data: text,
-      success: () => {
-        wx.showToast({ title: "已复制", icon: "success" })
-      }
-    })
+    copyToClipboard(text, "已复制")
+  },
+
+  copyReplyField(event) {
+    const index = Number(event.currentTarget.dataset.index)
+    const field = event.currentTarget.dataset.field
+    const item = this.data.results[index]
+    const text = item && item.card ? item.card[field] : ""
+    copyToClipboard(text, "已复制")
+  },
+
+  copyFirstReply(event) {
+    const field = event.currentTarget.dataset.field
+    const item = this.data.results[0]
+    const text = item && item.card ? item.card[field] : ""
+    copyToClipboard(text, "已复制首条")
   },
 
   async onEnhanceReply(event) {
@@ -210,25 +287,11 @@ Page({
     const index = Number(event.currentTarget.dataset.index)
     const text = buildCardText(this.data.filteredResults[index])
     if (!text) return
-    wx.setClipboardData({
-      data: text,
-      success: () => {
-        wx.showToast({ title: "已复制整张", icon: "success" })
-      }
-    })
+    copyToClipboard(text, "已复制整张")
   },
 
   copyAll() {
     const text = this.data.filteredResults.map(buildCardText).filter(Boolean).join("\n\n---\n\n")
-    if (!text) {
-      wx.showToast({ title: "没有可复制内容", icon: "none" })
-      return
-    }
-    wx.setClipboardData({
-      data: text,
-      success: () => {
-        wx.showToast({ title: "已复制全部", icon: "success" })
-      }
-    })
+    copyToClipboard(text, "已复制全部")
   }
 })

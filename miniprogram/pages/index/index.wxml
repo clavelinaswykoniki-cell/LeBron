@@ -1,46 +1,121 @@
 <view class="safe-area page">
-  <view class="hero">
-    <view>
-      <view class="eyebrow">COMMENT WAR ROOM</view>
-      <view class="title">詹黑逻辑拆解器</view>
-      <view class="subtitle">输入黑点、黑称或球星对比，直接拉出可复制弹药。</view>
+  <view class="court-hero gold-rim">
+    <view class="hero-copy">
+      <view class="league-pill">
+        <t-icon name="flashlight" size="28rpx" color="#f8c44f" />
+        <text>紫金弹药库</text>
+      </view>
+      <view class="hero-title">
+        <text class="hero-title-main">詹黑逻辑拆解器</text>
+        <text class="hero-title-num">23</text>
+      </view>
+      <view class="hero-subtitle">把评论区黑点拆成：短句反击、长逻辑、口播脚本和同标准回旋镖。</view>
+      <view class="hero-stats">
+        <view class="stat-card">
+          <view class="stat-num">{{arsenalStats.cards}}</view>
+          <view class="stat-label">反驳卡</view>
+        </view>
+        <view class="stat-card">
+          <view class="stat-num">{{arsenalStats.aliases}}</view>
+          <view class="stat-label">短梗命中</view>
+        </view>
+        <view class="stat-card">
+          <view class="stat-num">30</view>
+          <view class="stat-label">争议分类</view>
+        </view>
+      </view>
     </view>
-    <view class="arsenal">
-      <view class="arsenal-num">{{arsenalStats.cards}}</view>
-      <view class="arsenal-label">反驳卡</view>
-      <view class="arsenal-sub">{{arsenalStats.aliases}} 个短词命中</view>
+    <view class="jersey-card lakers-glow">
+      <view class="crown">KING</view>
+      <view class="jersey-num">23</view>
+      <view class="jersey-line">LOGIC OVER HATE</view>
     </view>
   </view>
 
-  <view class="panel">
-    <view class="panel-head">
-      <view class="panel-title">作战输入</view>
-      <view class="panel-note">短词、黑称、整句都能搜</view>
+  <view class="mood-panel">
+    <view class="section-head">
+      <view>
+        <view class="section-kicker">先选作战模式</view>
+        <view class="section-title">想怎么回，就怎么打</view>
+      </view>
+      <t-tag theme="warning" variant="light" shape="round">一键复制</t-tag>
     </view>
-    <textarea
-      class="query-input"
-      placeholder="例如：8分 / 米奇冠军 / 科比五冠 / Excel球王 / 老张跑路"
-      value="{{query}}"
-      bindinput="onInput"
-      maxlength="120"
-      auto-height
-    />
-    <view class="actions">
-      <button class="primary-btn" bindtap="onGenerate">生成反驳</button>
-      <button class="ghost-btn" bindtap="onRandom">随机一条</button>
+    <view class="mood-grid">
+      <view
+        wx:for="{{moodTabs}}"
+        wx:key="id"
+        class="mood-card {{activeMood === item.id ? 'active' : ''}}"
+        data-mood="{{item.id}}"
+        bindtap="onMoodTap"
+      >
+        <t-icon name="{{item.icon}}" size="32rpx" color="{{activeMood === item.id ? '#170826' : '#f8c44f'}}" />
+        <text>{{item.name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="battle-panel gold-rim">
+    <view class="section-head">
+      <view>
+        <view class="section-kicker">热梗开打</view>
+        <view class="section-title">点一下，直接出弹药</view>
+      </view>
+      <t-icon name="chevron-right" size="32rpx" color="#f8c44f" />
+    </view>
+    <view class="battle-grid">
+      <view
+        wx:for="{{hotBattles}}"
+        wx:key="label"
+        class="battle-card"
+        data-value="{{item.query}}"
+        bindtap="onHotBattleTap"
+      >
+        <view class="battle-label">{{item.label}}</view>
+        <view class="battle-tone">{{item.tone}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="search-panel">
+    <view class="panel-head">
+      <view>
+        <view class="section-kicker">自定义黑点</view>
+        <view class="panel-title">输入一句，对线系统自动拆</view>
+      </view>
+      <t-tag theme="primary" variant="outline" shape="round">本地兜底</t-tag>
+    </view>
+    <view class="input-shell">
+      <textarea
+        class="query-input"
+        placeholder="例如：8分 / 米奇冠军 / 靠身体没技术 / 科比五冠 / Excel詹"
+        value="{{query}}"
+        bindinput="onInput"
+        maxlength="120"
+        auto-height
+      />
+    </view>
+    <view class="primary-actions">
+      <t-button class="action-primary" theme="primary" block shape="round" bindtap="onGenerate">
+        <t-icon name="search" size="30rpx" color="#170826" />
+        <text>生成反驳</text>
+      </t-button>
+      <t-button class="action-random" theme="default" variant="outline" shape="round" bindtap="onRandom">随机一条</t-button>
     </view>
   </view>
 
   <view class="quick-section">
     <view class="tool-title">高频黑点</view>
     <view class="quick">
-    <view
-      wx:for="{{quickInputs}}"
-      wx:key="*this"
-      class="quick-chip"
-      data-value="{{item}}"
-      bindtap="onQuickTap"
-    >{{item}}</view>
+      <t-tag
+        wx:for="{{quickInputs}}"
+        wx:key="*this"
+        class="quick-chip"
+        theme="warning"
+        variant="light"
+        shape="round"
+        data-value="{{item}}"
+        bindtap="onQuickTap"
+      >{{item}}</t-tag>
     </view>
   </view>
 
@@ -57,60 +132,71 @@
     </view>
   </scroll-view>
 
+  <view wx:if="{{isCategoryFiltered}}" class="filter-status">
+    <view>
+      <view class="filter-title">正在浏览：{{activeCategory}}</view>
+      <view class="filter-sub">分类弹药库已展开，随时回到当前搜索。</view>
+    </view>
+    <t-button class="clear-filter-btn" theme="warning" size="small" shape="round" bindtap="onClearCategory">回到搜索</t-button>
+  </view>
+
   <view wx:if="{{results.length}}" class="toolbar">
     <view>
-      <view class="toolbar-title">命中 {{results.length}} 张弹药卡</view>
-      <view class="toolbar-sub">当前分类：{{activeCategory}}</view>
+      <view class="toolbar-title">命中 {{results.length}} 张拆解卡</view>
+      <view class="toolbar-sub">当前分类：{{activeCategory}} · 当前模式：{{activeMoodLabel}}</view>
     </view>
-    <button class="copy-all-btn" bindtap="copyAll">复制全部</button>
+    <view class="toolbar-actions">
+      <t-button class="copy-first-btn" data-field="short_reply" theme="primary" size="small" shape="round" bindtap="copyFirstReply">短句</t-button>
+      <t-button class="copy-first-btn" data-field="one_liner" theme="warning" size="small" shape="round" bindtap="copyFirstReply">一句</t-button>
+      <t-button class="copy-all-btn" theme="danger" size="small" shape="round" bindtap="copyAll">全部</t-button>
+    </view>
   </view>
 
   <view wx:if="{{results.length}}" class="results">
-    <view wx:for="{{results}}" wx:key="resultKey" class="result-card">
+    <view wx:for="{{results}}" wx:key="resultKey" class="result-card gold-rim">
       <view class="meta-row">
-        <view>
-          <text class="category">{{item.category}}</text>
+        <view class="meta-left">
+          <t-tag theme="warning" variant="light" shape="round">{{item.category}}</t-tag>
           <text class="alias">命中：{{item.alias}}</text>
         </view>
         <view class="card-actions">
-          <button
+          <t-button
             class="enhance-btn"
+            theme="primary"
+            size="small"
+            shape="round"
             data-index="{{index}}"
             bindtap="onEnhanceReply"
+            loading="{{item.isEnhancing}}"
             disabled="{{item.isEnhancing}}"
-          >{{item.isEnhancing ? '生成中' : 'AI增强'}}</button>
-          <button class="copy-card-btn" data-index="{{index}}" bindtap="copyCard">复制整张</button>
+          >{{item.isEnhancing ? '生成中' : 'AI增强'}}</t-button>
+          <t-button class="copy-card-btn" theme="default" variant="outline" size="small" shape="round" data-index="{{index}}" bindtap="copyCard">整张</t-button>
         </view>
       </view>
-      <view class="claim">{{item.card.claim}}</view>
+
+      <view class="claim-box">
+        <view class="claim-label">对方话术</view>
+        <view class="claim">{{item.card.claim}}</view>
+      </view>
+
+      <view class="hit-reply lakers-glow">
+        <view class="hit-label">先回这句</view>
+        <view class="hit-text">{{item.card.short_reply}}</view>
+        <t-button class="hit-copy" theme="primary" size="small" shape="round" data-index="{{index}}" data-field="short_reply" bindtap="copyReplyField">一键复制</t-button>
+      </view>
+
+      <view class="copy-strip">
+        <t-button class="mini-copy-btn {{activeMood === 'short_reply' ? 'hot' : ''}}" data-index="{{index}}" data-field="short_reply" theme="primary" size="small" shape="round" bindtap="copyReplyField">短句</t-button>
+        <t-button class="mini-copy-btn {{activeMood === 'one_liner' ? 'hot' : ''}}" data-index="{{index}}" data-field="one_liner" theme="warning" size="small" shape="round" bindtap="copyReplyField">一句</t-button>
+        <t-button class="mini-copy-btn {{activeMood === 'long_reply' ? 'hot' : ''}}" data-index="{{index}}" data-field="long_reply" theme="default" variant="outline" size="small" shape="round" bindtap="copyReplyField">长文</t-button>
+        <t-button class="mini-copy-btn {{activeMood === 'video_script' ? 'hot' : ''}}" data-index="{{index}}" data-field="video_script" theme="default" variant="outline" size="small" shape="round" bindtap="copyReplyField">口播</t-button>
+      </view>
 
       <view wx:if="{{item.card.tags.length}}" class="tags">
-        <text wx:for="{{item.card.tags}}" wx:key="*this" class="tag">{{item}}</text>
+        <t-tag wx:for="{{item.card.tags}}" wx:key="*this" class="tag" theme="primary" variant="light" shape="round">{{item}}</t-tag>
       </view>
 
-      <view class="section">
-        <view class="section-title">评论区短刀</view>
-        <view class="reply">{{item.card.short_reply}}</view>
-        <button class="copy-btn" data-text="{{item.card.short_reply}}" bindtap="copyText">复制</button>
-      </view>
-
-      <view class="section">
-        <view class="section-title">长线拆解</view>
-        <view class="reply">{{item.card.long_reply}}</view>
-        <button class="copy-btn" data-text="{{item.card.long_reply}}" bindtap="copyText">复制</button>
-      </view>
-
-      <view class="section compact">
-        <view class="section-title">一句话封口</view>
-        <view class="one-liner">{{item.card.one_liner}}</view>
-        <button class="copy-btn" data-text="{{item.card.one_liner}}" bindtap="copyText">复制</button>
-      </view>
-
-      <view class="section">
-        <view class="section-title">口播弹药</view>
-        <view class="reply">{{item.card.video_script}}</view>
-        <button class="copy-btn" data-text="{{item.card.video_script}}" bindtap="copyText">复制</button>
-      </view>
+      <t-divider content="逻辑拆解" />
 
       <view class="logic-grid">
         <view class="logic-item">
@@ -122,9 +208,27 @@
           <view class="logic-text">{{item.card.logic_flaw}}</view>
         </view>
         <view class="logic-item wide">
-          <view class="logic-label">同标准对比</view>
+          <view class="logic-label">同标准回旋镖</view>
           <view class="logic-text">{{item.card.comparison}}</view>
         </view>
+      </view>
+
+      <view class="section">
+        <view class="section-title">长线拆解</view>
+        <view class="reply">{{item.card.long_reply}}</view>
+        <t-button class="copy-btn" theme="default" variant="outline" size="small" shape="round" data-text="{{item.card.long_reply}}" bindtap="copyText">复制长文</t-button>
+      </view>
+
+      <view class="section compact">
+        <view class="section-title">一句话封口</view>
+        <view class="one-liner">{{item.card.one_liner}}</view>
+        <t-button class="copy-btn" theme="warning" size="small" shape="round" data-text="{{item.card.one_liner}}" bindtap="copyText">复制一句</t-button>
+      </view>
+
+      <view class="section">
+        <view class="section-title">视频口播版</view>
+        <view class="reply">{{item.card.video_script}}</view>
+        <t-button class="copy-btn" theme="default" variant="outline" size="small" shape="round" data-text="{{item.card.video_script}}" bindtap="copyText">复制口播</t-button>
       </view>
 
       <view wx:if="{{item.card.facts.length}}" class="facts">
@@ -135,7 +239,7 @@
   </view>
 
   <view wx:else class="empty-state">
-    <view class="empty-title">没有命中当前分类</view>
-    <view class="empty-sub">切回“全部”，或换一个黑点继续搜。</view>
+    <view class="empty-title">这枪还没装弹</view>
+    <view class="empty-sub">换个黑点继续搜，或者点上面的热梗直接出弹药。</view>
   </view>
 </view>

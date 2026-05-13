@@ -27,7 +27,7 @@ const docxStats = docxCards.stats || {}
 assert(baseCards.length === 43, `baseCards expected 43, got ${baseCards.length}`)
 assert(extraCards.length === 57, `extraCards expected 57, got ${extraCards.length}`)
 assert(baseCards.length + extraCards.length === 100, "old baseline card count changed")
-assert(baseAliases.length === 335, `baseAliases expected 335, got ${baseAliases.length}`)
+assert(baseAliases.length === 348, `baseAliases expected 348, got ${baseAliases.length}`)
 assert(docxStats.rawCount === docxCards.length + docxReviewNeeded.length, "docx raw count mismatch")
 assert(docxStats.rawCount === 50, `docx raw count expected 50, got ${docxStats.rawCount}`)
 assert(docxReviewNeeded.length > 0, "expected some review_needed docx items")
