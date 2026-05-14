@@ -43,7 +43,10 @@ const requiredWxmlTokens = [
   "23",
   "紫金弹药库",
   "热梗开打",
-  "一键复制",
+  "短刀",
+  "封口",
+  "长拆",
+  "口播",
   "t-button",
   "t-tag",
   "t-icon",
@@ -59,7 +62,8 @@ const requiredJsTokens = [
   "activeMood",
   "hotBattles",
   "onMoodTap",
-  "copyFirstReply"
+  "copyReplyField",
+  "updateResultLists"
 ]
 
 requiredJsTokens.forEach((token) => {

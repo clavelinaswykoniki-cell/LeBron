@@ -4,7 +4,8 @@ const https = require("https")
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 
 const DEEPSEEK_API_URL = `${process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com"}/chat/completions`
-const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || "deepseek-v4-pro"
+// Default to v4-flash (cheaper, faster). Override in CloudBase env via DEEPSEEK_MODEL.
+const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || "deepseek-v4-flash"
 
 function safeJsonParse(text) {
   try {
@@ -136,7 +137,7 @@ exports.main = async (event) => {
     ],
     response_format: { type: "json_object" },
     temperature: 0.7,
-    max_tokens: 1800,
+    max_tokens: 1200,
     thinking: {
       type: process.env.DEEPSEEK_THINKING || "disabled"
     }

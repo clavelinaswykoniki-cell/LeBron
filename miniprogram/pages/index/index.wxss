@@ -153,7 +153,7 @@
 }
 
 .quick-chip {
-  padding: 12rpx 18rpx;
+  padding: 16rpx 22rpx;
   border-radius: 999rpx;
   background: rgba(251, 191, 36, 0.12);
   color: #fcd34d;
@@ -172,7 +172,7 @@
   align-items: center;
   gap: 10rpx;
   margin-right: 12rpx;
-  padding: 12rpx 16rpx;
+  padding: 18rpx 20rpx;
   border-radius: 999rpx;
   background: #182235;
   color: #cbd5e1;
@@ -229,8 +229,8 @@
 
 .clear-filter-btn {
   flex: 0 0 154rpx;
-  height: 56rpx;
-  line-height: 56rpx;
+  height: 72rpx;
+  line-height: 72rpx;
   background: #fbbf24;
   color: #111827;
   font-size: 22rpx;
@@ -269,13 +269,13 @@
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 10rpx;
-  flex: 0 0 360rpx;
+  flex: 0 1 auto;
 }
 
 .copy-first-btn {
   width: 112rpx;
-  height: 58rpx;
-  line-height: 58rpx;
+  height: 72rpx;
+  line-height: 72rpx;
   background: #263244;
   color: #f8fafc;
   font-size: 21rpx;
@@ -284,8 +284,8 @@
 
 .copy-all-btn {
   width: 118rpx;
-  height: 58rpx;
-  line-height: 58rpx;
+  height: 72rpx;
+  line-height: 72rpx;
   background: #dc2626;
   color: #fff7ed;
   font-size: 21rpx;
@@ -342,8 +342,8 @@
 
 .copy-card-btn {
   width: 164rpx;
-  height: 56rpx;
-  line-height: 56rpx;
+  height: 72rpx;
+  line-height: 72rpx;
   background: #1f2937;
   color: #f8fafc;
   font-size: 22rpx;
@@ -359,8 +359,8 @@
 
 .enhance-btn {
   width: 164rpx;
-  height: 56rpx;
-  line-height: 56rpx;
+  height: 72rpx;
+  line-height: 72rpx;
   background: #fbbf24;
   color: #111827;
   font-size: 22rpx;
@@ -387,8 +387,8 @@
 }
 
 .mini-copy-btn {
-  height: 58rpx;
-  line-height: 58rpx;
+  height: 72rpx;
+  line-height: 72rpx;
   background: #1f2937;
   color: #e5e7eb;
   font-size: 22rpx;
@@ -446,9 +446,9 @@
 
 .copy-btn {
   margin-top: 16rpx;
-  width: 144rpx;
-  height: 56rpx;
-  line-height: 56rpx;
+  width: 168rpx;
+  height: 72rpx;
+  line-height: 72rpx;
   background: #263244;
   color: #f8fafc;
   font-size: 23rpx;
@@ -468,10 +468,11 @@
 }
 
 .logic-label {
-  color: #93c5fd;
+  color: #fde68a;
   font-size: 22rpx;
   font-weight: 900;
   margin-bottom: 8rpx;
+  letter-spacing: 1rpx;
 }
 
 .logic-text {
@@ -613,14 +614,14 @@ page {
 
 .hero-title-main {
   color: #f8fafc;
-  font-size: 50rpx;
-  line-height: 1.05;
+  font-size: 42rpx;
+  line-height: 1.1;
   font-weight: 900;
   letter-spacing: 1rpx;
 }
 
 .hero-title-num {
-  font-size: 64rpx;
+  font-size: 56rpx;
   line-height: 1;
   font-weight: 900;
   color: #fbbf24;
@@ -629,7 +630,7 @@ page {
 
 .hero-subtitle {
   margin-top: 4rpx;
-  color: #c4b5fd;
+  color: #e9d5ff;
   font-size: 24rpx;
   line-height: 1.5;
 }
@@ -651,7 +652,7 @@ page {
 
 .stat-num {
   color: #fbbf24;
-  font-size: 36rpx;
+  font-size: 40rpx;
   line-height: 1;
   font-weight: 900;
 }
@@ -684,7 +685,7 @@ page {
 
 .jersey-num {
   color: #fef3c7;
-  font-size: 108rpx;
+  font-size: 84rpx;
   line-height: 1;
   font-weight: 900;
   margin: 6rpx 0;

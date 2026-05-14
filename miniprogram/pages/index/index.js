@@ -1,5 +1,5 @@
 const { matchQuery, randomCard } = require("../../utils/matchQuery")
-const { generateEnhancedReply } = require("../../utils/llmProvider")
+const { generateEnhancedReply, generateWithLocalCard } = require("../../utils/llmProvider")
 const arsenal = require("../../data/arsenal")
 const corePositions = require("../../data/core_positions")
 
@@ -58,15 +58,6 @@ function buildCardText(item) {
   ].join("\n")
 }
 
-function pickReplyFields(card) {
-  return {
-    short_reply: card.short_reply,
-    long_reply: card.long_reply,
-    one_liner: card.one_liner,
-    video_script: card.video_script
-  }
-}
-
 function copyToClipboard(text, title) {
   if (!text) {
     wx.showToast({ title: "没有可复制内容", icon: "none" })
@@ -75,9 +66,16 @@ function copyToClipboard(text, title) {
   wx.setClipboardData({
     data: text,
     success: () => {
+      wx.vibrateShort && wx.vibrateShort({ type: "light" })
       wx.showToast({ title, icon: "success" })
     }
   })
+}
+
+function tapFeedback() {
+  if (typeof wx !== "undefined" && wx.vibrateShort) {
+    wx.vibrateShort({ type: "light" })
+  }
 }
 
 Page({
@@ -89,18 +87,16 @@ Page({
       aliases: arsenal.aliases.length
     },
     categoryFilters: buildCategoryFilters(),
-    enhancedLoadingMap: {},
     allResults: [],
-    filteredResults: [],
     results: [],
     isCategoryFiltered: false,
     activeMood: "short_reply",
-    activeMoodLabel: "热梗开打",
+    activeMoodLabel: "短刀",
     moodTabs: [
-      { id: "short_reply", name: "热梗开打", field: "short_reply", icon: "thunder" },
-      { id: "one_liner", name: "一键复制", field: "one_liner", icon: "copy" },
-      { id: "video_script", name: "口播上墙", field: "video_script", icon: "sound" },
-      { id: "long_reply", name: "长逻辑压制", field: "long_reply", icon: "chat" }
+      { id: "short_reply", name: "短刀", field: "short_reply", icon: "thunder" },
+      { id: "one_liner", name: "封口", field: "one_liner", icon: "lightning" },
+      { id: "long_reply", name: "长拆", field: "long_reply", icon: "chat" },
+      { id: "video_script", name: "口播", field: "video_script", icon: "sound" }
     ],
     hotBattles: [
       { label: "8分释兵权", query: "8分释兵权", tone: "经典硬仗" },
@@ -125,7 +121,9 @@ Page({
   },
 
   onLoad() {
-    this.setSearchResults(matchQuery("8分"))
+    const seed = "8分"
+    this.setData({ query: seed })
+    this.setSearchResults(matchQuery(seed))
   },
 
   onInput(event) {
@@ -138,7 +136,6 @@ Page({
       activeCategory: "全部",
       isCategoryFiltered: false,
       allResults: normalized,
-      filteredResults: normalized,
       results: normalized
     })
   },
@@ -149,58 +146,57 @@ Page({
     this.setData({
       activeCategory,
       isCategoryFiltered: activeCategory !== "全部",
-      filteredResults: normalized,
       results: normalized
     })
   },
 
-  setEnhanceLoading(resultKey, loading) {
-    const loadingMap = {
-      ...this.data.enhancedLoadingMap,
-      [resultKey]: loading
-    }
-    const markLoading = (item) => item.resultKey === resultKey
-      ? { ...item, isEnhancing: loading }
-      : item
+  updateResultLists(updater) {
     this.setData({
-      enhancedLoadingMap: loadingMap,
-      allResults: this.data.allResults.map(markLoading),
-      filteredResults: this.data.filteredResults.map(markLoading),
-      results: this.data.results.map(markLoading)
+      allResults: this.data.allResults.map(updater),
+      results: this.data.results.map(updater)
     })
   },
 
+  setEnhanceLoading(resultKey, loading) {
+    this.updateResultLists((item) =>
+      item.resultKey === resultKey ? { ...item, isEnhancing: loading } : item
+    )
+  },
+
   mergeEnhancedReply(resultKey, reply) {
-    const mergeItem = (item) => {
+    this.updateResultLists((item) => {
       if (item.resultKey !== resultKey) return item
       return {
         ...item,
-        localReply: item.localReply || pickReplyFields(item.card),
+        localReply: item.localReply || generateWithLocalCard(item.card),
         card: {
           ...item.card,
           ...reply
         }
       }
-    }
-    this.setData({
-      allResults: this.data.allResults.map(mergeItem),
-      filteredResults: this.data.filteredResults.map(mergeItem),
-      results: this.data.results.map(mergeItem)
     })
   },
 
   onGenerate() {
-    this.setSearchResults(matchQuery(this.data.query))
+    const q = (this.data.query || "").trim()
+    if (!q) {
+      this.setSearchResults([])
+      return
+    }
+    this.setSearchResults(matchQuery(q))
   },
 
   onQuickTap(event) {
     const value = event.currentTarget.dataset.value
+    if (value === this.data.query) return
+    tapFeedback()
     this.setData({ query: value })
     this.setSearchResults(matchQuery(value))
   },
 
   onCategoryTap(event) {
     const category = event.currentTarget.dataset.category
+    if (category === this.data.activeCategory) return
     if (category === "全部") {
       this.applyResults(this.data.allResults, "全部")
       return
@@ -213,7 +209,8 @@ Page({
 
   onMoodTap(event) {
     const mood = event.currentTarget.dataset.mood
-    if (!mood) return
+    if (!mood || mood === this.data.activeMood) return
+    tapFeedback()
     const tab = this.data.moodTabs.find((item) => item.id === mood)
     this.setData({
       activeMood: mood,
@@ -223,10 +220,12 @@ Page({
 
   onHotBattleTap(event) {
     const value = event.currentTarget.dataset.value
+    if (!value || value === this.data.query) return
+    tapFeedback()
     this.setData({
       query: value,
       activeMood: "short_reply",
-      activeMoodLabel: "热梗开打"
+      activeMoodLabel: "短刀"
     })
     this.setSearchResults(matchQuery(value))
   },
@@ -236,6 +235,7 @@ Page({
   },
 
   onRandom() {
+    tapFeedback()
     const card = randomCard()
     this.setData({ query: card.tags && card.tags.length ? card.tags[0] : card.category })
     this.setSearchResults([wrapCard(card, "随机")])
@@ -247,23 +247,17 @@ Page({
   },
 
   copyReplyField(event) {
-    const index = Number(event.currentTarget.dataset.index)
+    const index = Number(event.currentTarget.dataset.index) || 0
     const field = event.currentTarget.dataset.field
     const item = this.data.results[index]
     const text = item && item.card ? item.card[field] : ""
-    copyToClipboard(text, "已复制")
-  },
-
-  copyFirstReply(event) {
-    const field = event.currentTarget.dataset.field
-    const item = this.data.results[0]
-    const text = item && item.card ? item.card[field] : ""
-    copyToClipboard(text, "已复制首条")
+    const title = event.currentTarget.dataset.title || "已复制"
+    copyToClipboard(text, title)
   },
 
   async onEnhanceReply(event) {
     const index = Number(event.currentTarget.dataset.index)
-    const item = this.data.filteredResults[index]
+    const item = this.data.results[index]
     if (!item || item.isEnhancing) return
 
     this.setEnhanceLoading(item.resultKey, true)
@@ -285,13 +279,22 @@ Page({
 
   copyCard(event) {
     const index = Number(event.currentTarget.dataset.index)
-    const text = buildCardText(this.data.filteredResults[index])
+    const text = buildCardText(this.data.results[index])
     if (!text) return
     copyToClipboard(text, "已复制整张")
   },
 
   copyAll() {
-    const text = this.data.filteredResults.map(buildCardText).filter(Boolean).join("\n\n---\n\n")
+    const text = this.data.results.map(buildCardText).filter(Boolean).join("\n\n---\n\n")
     copyToClipboard(text, "已复制全部")
+  },
+
+  toggleExpand(event) {
+    const index = Number(event.currentTarget.dataset.index)
+    if (Number.isNaN(index)) return
+    const results = this.data.results.map((item, i) =>
+      i === index ? { ...item, expanded: !item.expanded } : item
+    )
+    this.setData({ results })
   }
 })

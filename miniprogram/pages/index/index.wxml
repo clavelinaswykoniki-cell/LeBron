@@ -7,7 +7,6 @@
       </view>
       <view class="hero-title">
         <text class="hero-title-main">詹黑逻辑拆解器</text>
-        <text class="hero-title-num">23</text>
       </view>
       <view class="hero-subtitle">把评论区黑点拆成：短句反击、长逻辑、口播脚本和同标准回旋镖。</view>
       <view class="hero-stats">
@@ -38,7 +37,7 @@
         <view class="section-kicker">先选作战模式</view>
         <view class="section-title">想怎么回，就怎么打</view>
       </view>
-      <t-tag theme="warning" variant="light" shape="round">一键复制</t-tag>
+      <t-tag theme="warning" variant="light" shape="round">战术模式</t-tag>
     </view>
     <view class="mood-grid">
       <view
@@ -146,8 +145,8 @@
       <view class="toolbar-sub">当前分类：{{activeCategory}} · 当前模式：{{activeMoodLabel}}</view>
     </view>
     <view class="toolbar-actions">
-      <t-button class="copy-first-btn" data-field="short_reply" theme="primary" size="small" shape="round" bindtap="copyFirstReply">短句</t-button>
-      <t-button class="copy-first-btn" data-field="one_liner" theme="warning" size="small" shape="round" bindtap="copyFirstReply">一句</t-button>
+      <t-button class="copy-first-btn" data-index="0" data-field="short_reply" data-title="已复制首条" theme="primary" size="small" shape="round" bindtap="copyReplyField">短刀</t-button>
+      <t-button class="copy-first-btn" data-index="0" data-field="one_liner" data-title="已复制首条" theme="warning" size="small" shape="round" bindtap="copyReplyField">封口</t-button>
       <t-button class="copy-all-btn" theme="danger" size="small" shape="round" bindtap="copyAll">全部</t-button>
     </view>
   </view>
@@ -186,13 +185,17 @@
       </view>
 
       <view class="copy-strip">
-        <t-button class="mini-copy-btn {{activeMood === 'short_reply' ? 'hot' : ''}}" data-index="{{index}}" data-field="short_reply" theme="primary" size="small" shape="round" bindtap="copyReplyField">短句</t-button>
-        <t-button class="mini-copy-btn {{activeMood === 'one_liner' ? 'hot' : ''}}" data-index="{{index}}" data-field="one_liner" theme="warning" size="small" shape="round" bindtap="copyReplyField">一句</t-button>
-        <t-button class="mini-copy-btn {{activeMood === 'long_reply' ? 'hot' : ''}}" data-index="{{index}}" data-field="long_reply" theme="default" variant="outline" size="small" shape="round" bindtap="copyReplyField">长文</t-button>
+        <t-button class="mini-copy-btn {{activeMood === 'short_reply' ? 'hot' : ''}}" data-index="{{index}}" data-field="short_reply" theme="primary" size="small" shape="round" bindtap="copyReplyField">短刀</t-button>
+        <t-button class="mini-copy-btn {{activeMood === 'one_liner' ? 'hot' : ''}}" data-index="{{index}}" data-field="one_liner" theme="warning" size="small" shape="round" bindtap="copyReplyField">封口</t-button>
+        <t-button class="mini-copy-btn {{activeMood === 'long_reply' ? 'hot' : ''}}" data-index="{{index}}" data-field="long_reply" theme="default" variant="outline" size="small" shape="round" bindtap="copyReplyField">长拆</t-button>
         <t-button class="mini-copy-btn {{activeMood === 'video_script' ? 'hot' : ''}}" data-index="{{index}}" data-field="video_script" theme="default" variant="outline" size="small" shape="round" bindtap="copyReplyField">口播</t-button>
       </view>
 
-      <view wx:if="{{item.card.tags.length}}" class="tags">
+      <view class="expand-toggle" data-index="{{index}}" bindtap="toggleExpand">
+        <text>{{item.expanded ? '收起详情' : '查看详情（长拆 / 封口 / 口播）'}}</text>
+      </view>
+
+      <view wx:if="{{item.card.tags && item.card.tags.length}}" class="tags">
         <t-tag wx:for="{{item.card.tags}}" wx:key="*this" class="tag" theme="primary" variant="light" shape="round">{{item}}</t-tag>
       </view>
 
@@ -213,25 +216,24 @@
         </view>
       </view>
 
-      <view class="section">
-        <view class="section-title">长线拆解</view>
-        <view class="reply">{{item.card.long_reply}}</view>
-        <t-button class="copy-btn" theme="default" variant="outline" size="small" shape="round" data-text="{{item.card.long_reply}}" bindtap="copyText">复制长文</t-button>
-      </view>
+      <block wx:if="{{item.expanded}}">
+        <view class="section">
+          <view class="section-title">长线拆解</view>
+          <view class="reply">{{item.card.long_reply}}</view>
+        </view>
 
-      <view class="section compact">
-        <view class="section-title">一句话封口</view>
-        <view class="one-liner">{{item.card.one_liner}}</view>
-        <t-button class="copy-btn" theme="warning" size="small" shape="round" data-text="{{item.card.one_liner}}" bindtap="copyText">复制一句</t-button>
-      </view>
+        <view class="section compact">
+          <view class="section-title">一句话封口</view>
+          <view class="one-liner">{{item.card.one_liner}}</view>
+        </view>
 
-      <view class="section">
-        <view class="section-title">视频口播版</view>
-        <view class="reply">{{item.card.video_script}}</view>
-        <t-button class="copy-btn" theme="default" variant="outline" size="small" shape="round" data-text="{{item.card.video_script}}" bindtap="copyText">复制口播</t-button>
-      </view>
+        <view class="section">
+          <view class="section-title">视频口播版</view>
+          <view class="reply">{{item.card.video_script}}</view>
+        </view>
+      </block>
 
-      <view wx:if="{{item.card.facts.length}}" class="facts">
+      <view wx:if="{{item.card.facts && item.card.facts.length}}" class="facts">
         <view class="facts-title">事实点</view>
         <view wx:for="{{item.card.facts}}" wx:key="*this" class="fact-row">• {{item}}</view>
       </view>
@@ -240,6 +242,7 @@
 
   <view wx:else class="empty-state">
     <view class="empty-title">这枪还没装弹</view>
-    <view class="empty-sub">换个黑点继续搜，或者点上面的热梗直接出弹药。</view>
+    <view class="empty-sub">输入一个黑点，或者点上面的热梗直接出弹药。</view>
   </view>
+
 </view>
