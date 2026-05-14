@@ -2,6 +2,23 @@
 // "弹药库" 关于页：展示段位 / 勋章墙 / 项目信息。
 
 const progression = require('../../utils/progression.js');
+const arsenal = require('../../data/arsenal');
+
+// 从 arsenal 实时计算数据规模，避免硬编码 drift。
+const PROJECT_INFO = (function () {
+  try {
+    return {
+      cards: arsenal.cards.length,
+      aliases: arsenal.aliases.length,
+      categories: new Set(arsenal.cards.map(function (c) { return c.category; })).size,
+      version: 'v2.0',
+      author: 'happytang',
+      license: 'MIT'
+    };
+  } catch (e) {
+    return { cards: 0, aliases: 0, categories: 0, version: 'v2.0', author: 'happytang', license: 'MIT' };
+  }
+})();
 
 Page({
   data: {
@@ -10,14 +27,7 @@ Page({
     viewCount: 0,
     copyCount: 0,
     badges: [],
-    projectInfo: {
-      cards: 150,
-      aliases: 441,
-      categories: 30,
-      version: 'v2.0',
-      author: 'happytang',
-      license: 'MIT'
-    }
+    projectInfo: PROJECT_INFO
   },
 
   onLoad: function () {

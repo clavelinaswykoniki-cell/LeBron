@@ -12,6 +12,10 @@ Page({
     ]
   },
   goHome() {
-    wx.navigateBack({ delta: 1, fail: () => wx.switchTab && wx.switchTab({ url: "/pages/index/index" }) || wx.redirectTo({ url: "/pages/index/index" }) })
+    // easter 不在 tabBar，所以失败时直接 reLaunch 到首页
+    wx.navigateBack({
+      delta: 1,
+      fail: () => wx.reLaunch({ url: "/pages/index/index" })
+    })
   }
 })

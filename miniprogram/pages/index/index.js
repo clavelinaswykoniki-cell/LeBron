@@ -116,7 +116,14 @@ Page({
     activeCategory: "全部",
     arsenalStats: {
       cards: allCards.length,
-      aliases: arsenal.aliases.length
+      aliases: arsenal.aliases.length,
+      categories: (function () {
+        try {
+          return new Set(allCards.map(function (c) { return c.category; })).size
+        } catch (e) {
+          return 0
+        }
+      })()
     },
     categoryFilters: buildCategoryFilters(),
     allResults: [],

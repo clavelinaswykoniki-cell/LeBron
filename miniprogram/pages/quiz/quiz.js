@@ -53,7 +53,8 @@ Page({
     if (!r) return
     wx.setClipboardData({
       data: `我的詹姆斯态度测试结果：${r.title} —— ${r.desc}`,
-      success: () => wx.showToast({ title: "已复制", icon: "success" })
+      success: () => wx.showToast({ title: "已复制", icon: "success" }),
+      fail: () => wx.showToast({ title: "复制失败，请重试", icon: "none" })
     })
   },
   goBack() { wx.navigateBack({ delta: 1 }) }

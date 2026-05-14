@@ -44,9 +44,17 @@ const STORAGE_KEY = 'lbr_progression';
 
 /**
  * 全分类数量阈值：viewedCategories 数量大于等于这个值时认为"全面了解"。
- * 当前 categories.js 大约 30 个分类，参考 about 页 projectInfo.categories=30。
+ * 动态从 arsenal.cards 计算 distinct category 数量，避免硬编码 drift
+ * （早期版本硬编码 30 但实际 cards 上有 38 个不同 category，导致 badge 早解锁）。
  */
-const ALL_CATEGORIES_COUNT = 30;
+const arsenal = require('../data/arsenal');
+const ALL_CATEGORIES_COUNT = (function () {
+  try {
+    return new Set(arsenal.cards.map(function (c) { return c.category; })).size;
+  } catch (e) {
+    return 30;
+  }
+})();
 
 /**
  * 返回一份默认 state 拷贝。

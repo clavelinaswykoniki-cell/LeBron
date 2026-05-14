@@ -19,7 +19,7 @@
           <view class="stat-label">短梗命中</view>
         </view>
         <view class="stat-card">
-          <view class="stat-num">30</view>
+          <view class="stat-num">{{arsenalStats.categories}}</view>
           <view class="stat-label">争议分类</view>
         </view>
       </view>
