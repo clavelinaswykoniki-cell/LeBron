@@ -24,11 +24,23 @@
         </view>
       </view>
     </view>
-    <view class="jersey-card lakers-glow">
+    <view class="jersey-card lakers-glow" bindlongpress="onJerseyLongPress">
       <view class="crown">KING</view>
       <view class="jersey-num">23</view>
       <view class="jersey-line">LOGIC OVER HATE</view>
+      <view class="jersey-hint">长按解锁</view>
     </view>
+  </view>
+
+  <view wx:if="{{rank}}" class="rank-strip" data-url="/pages/about/about" bindtap="onMenuTap">
+    <view class="rank-strip-left">
+      <text class="rank-strip-emoji">🏆</text>
+      <view>
+        <view class="rank-strip-title">我的段位：{{rank.rank.name}}</view>
+        <view class="rank-strip-sub">已读 {{rank.viewCount}} 张 · 已复制 {{rank.copyCount}} 次</view>
+      </view>
+    </view>
+    <view class="rank-strip-arrow">›</view>
   </view>
 
   <view class="mood-panel">
@@ -243,6 +255,24 @@
   <view wx:else class="empty-state">
     <view class="empty-title">这枪还没装弹</view>
     <view class="empty-sub">输入一个黑点，或者点上面的热梗直接出弹药。</view>
+  </view>
+
+  <view class="menu-grid">
+    <view
+      wx:for="{{menuEntries}}"
+      wx:key="id"
+      class="menu-entry"
+      data-url="{{item.url}}"
+      bindtap="onMenuTap"
+    >
+      <view class="menu-emoji">{{item.emoji}}</view>
+      <view class="menu-label">{{item.label}}</view>
+    </view>
+  </view>
+
+  <view class="footer-note">
+    <text class="footer-text">练手项目 · v2.0 · </text>
+    <text class="footer-link" data-url="/pages/privacy/privacy" bindtap="onMenuTap">隐私政策</text>
   </view>
 
 </view>

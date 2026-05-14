@@ -1,0 +1,9 @@
+<view class="privacy-page">
+  <text class="title">隐私政策</text>
+  <text class="updated">更新于 {{updatedAt}}</text>
+  <view class="section" wx:for="{{sections}}" wx:key="title">
+    <view class="section-title">{{item.title}}</view>
+    <view class="section-body">{{item.body}}</view>
+  </view>
+  <button bindtap="goBack">返回首页</button>
+</view>

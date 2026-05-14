@@ -1,5 +1,8 @@
 const { matchQuery, randomCard } = require("../../utils/matchQuery")
 const { generateEnhancedReply, generateWithLocalCard } = require("../../utils/llmProvider")
+const { tactileFeedback } = require("../../utils/feedback")
+const progression = require("../../utils/progression")
+const safety = require("../../utils/safety")
 const arsenal = require("../../data/arsenal")
 const corePositions = require("../../data/core_positions")
 
@@ -66,9 +69,38 @@ function copyToClipboard(text, title) {
   wx.setClipboardData({
     data: text,
     success: () => {
-      wx.vibrateShort && wx.vibrateShort({ type: "light" })
-      wx.showToast({ title, icon: "success" })
-    }
+      tactileFeedback({ toast: title })
+      // 记录一次复制，可能解锁勋章
+      try {
+        const { badgesUnlocked } = progression.recordCopy()
+        if (badgesUnlocked && badgesUnlocked.length) {
+          setTimeout(() => {
+            wx.showToast({ title: "🏆 解锁勋章：" + badgesUnlocked[0].name, icon: "none", duration: 1800 })
+          }, 1200)
+        }
+      } catch (e) {}
+    },
+    fail: () => wx.showToast({ title: "复制失败，请重试", icon: "none" })
+  })
+}
+
+function trackCardViews(results) {
+  if (!results || !results.length) return
+  results.forEach((item) => {
+    if (!item || !item.card) return
+    try {
+      const { rankUp, badgesUnlocked } = progression.recordCardView(item.card.id, item.card.category)
+      if (rankUp) {
+        const snapshot = progression.getCurrentRank()
+        setTimeout(() => {
+          wx.showToast({ title: "✨ 升段：" + snapshot.rank.name, icon: "none", duration: 2000 })
+        }, 800)
+      } else if (badgesUnlocked && badgesUnlocked.length) {
+        setTimeout(() => {
+          wx.showToast({ title: "🏆 解锁勋章：" + badgesUnlocked[0].name, icon: "none", duration: 1800 })
+        }, 800)
+      }
+    } catch (e) {}
   })
 }
 
@@ -117,6 +149,13 @@ Page({
       "摊皇不回防",
       "库里改变篮球",
       "LeGM"
+    ],
+    rank: null,
+    menuEntries: [
+      { id: "about", label: "我的段位", emoji: "🏆", url: "/pages/about/about" },
+      { id: "quiz", label: "球迷测试", emoji: "🧠", url: "/pages/quiz/quiz" },
+      { id: "easter", label: "23号秘藏", emoji: "👑", url: "/pages/easter/easter" },
+      { id: "privacy", label: "隐私说明", emoji: "🛡️", url: "/pages/privacy/privacy" }
     ]
   },
 
@@ -124,6 +163,18 @@ Page({
     const seed = "8分"
     this.setData({ query: seed })
     this.setSearchResults(matchQuery(seed))
+    this.refreshRank()
+  },
+
+  onShow() {
+    this.refreshRank()
+  },
+
+  refreshRank() {
+    try {
+      const rank = progression.getCurrentRank()
+      this.setData({ rank })
+    } catch (e) {}
   },
 
   onInput(event) {
@@ -138,6 +189,8 @@ Page({
       allResults: normalized,
       results: normalized
     })
+    trackCardViews(normalized)
+    this.refreshRank()
   },
 
   applyResults(results, category) {
@@ -180,6 +233,7 @@ Page({
   onGenerate() {
     const q = (this.data.query || "").trim()
     if (!q) {
+      safety.safeShowEmptyQuery()
       this.setSearchResults([])
       return
     }
@@ -296,5 +350,17 @@ Page({
       i === index ? { ...item, expanded: !item.expanded } : item
     )
     this.setData({ results })
+  },
+
+  onJerseyLongPress() {
+    tapFeedback()
+    safety.safeNavigate("/pages/easter/easter", "彩蛋开不了，点错地方了")
+  },
+
+  onMenuTap(event) {
+    const url = event.currentTarget.dataset.url
+    if (!url) return
+    tapFeedback()
+    safety.safeNavigate(url, "页面打开失败")
   }
 })

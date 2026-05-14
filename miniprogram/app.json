@@ -1,7 +1,11 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/result/result"
+    "pages/result/result",
+    "pages/about/about",
+    "pages/easter/easter",
+    "pages/quiz/quiz",
+    "pages/privacy/privacy"
   ],
   "window": {
     "navigationBarTitleText": "詹黑逻辑拆解器",

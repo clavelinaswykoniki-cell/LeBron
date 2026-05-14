@@ -1,0 +1,8 @@
+<view class="easter-page">
+  <text class="watermark">23</text>
+  <view class="hero-text">{{hero}}</view>
+  <view class="milestones">
+    <view class="milestone-card" wx:for="{{milestones}}" wx:key="*this">{{item}}</view>
+  </view>
+  <button class="back-btn" bindtap="goHome">返回弹药库</button>
+</view>

@@ -1,0 +1,53 @@
+<view class="page">
+
+  <!-- 段位区块 -->
+  <view class="section rank-section">
+    <view class="rank-title">{{rank.name}}</view>
+    <view class="rank-progress">
+      <view class="rank-bar">
+        <view
+          class="rank-bar-fill"
+          style="width: {{nextRank.threshold > rank.threshold ? ((viewCount - rank.threshold) * 100 / (nextRank.threshold - rank.threshold)) : 100}}%"
+        ></view>
+      </view>
+      <view class="rank-progress-text">{{viewCount}} / {{nextRank.threshold}}</view>
+    </view>
+    <view class="rank-stat">已读 {{viewCount}} 张卡</view>
+    <view class="rank-stat">已复制 {{copyCount}} 次</view>
+  </view>
+
+  <!-- 勋章墙区块 -->
+  <view class="section badges-section">
+    <view class="section-title">我的勋章墙</view>
+    <view class="badges-grid">
+      <view
+        wx:for="{{badges}}"
+        wx:key="id"
+        class="badge-item {{item.unlocked ? 'unlocked' : 'locked'}}"
+      >
+        <view class="badge-name">{{item.name}}</view>
+        <view class="badge-desc">{{item.desc}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 项目信息区块 -->
+  <view class="section info-section">
+    <view class="section-title">关于本应用</view>
+    <view class="info-row"><text class="info-key">卡片数</text><text class="info-val">{{projectInfo.cards}}</text></view>
+    <view class="info-row"><text class="info-key">别名数</text><text class="info-val">{{projectInfo.aliases}}</text></view>
+    <view class="info-row"><text class="info-key">分类数</text><text class="info-val">{{projectInfo.categories}}</text></view>
+    <view class="info-row"><text class="info-key">版本</text><text class="info-val">{{projectInfo.version}}</text></view>
+    <view class="info-row"><text class="info-key">作者</text><text class="info-val">{{projectInfo.author}}</text></view>
+    <view class="info-row"><text class="info-key">许可证</text><text class="info-val">{{projectInfo.license}}</text></view>
+
+    <view class="tribute">致敬 LeBron James —— 这套弹药库为你而生。</view>
+
+    <view class="disclaimer">
+      免责声明：本应用为个人练手项目，所有篮球观点仅为娱乐讨论，不代表任何官方立场。
+    </view>
+
+    <button class="back-btn" bindtap="goBack">返回</button>
+  </view>
+
+</view>

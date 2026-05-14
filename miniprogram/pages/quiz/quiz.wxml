@@ -1,0 +1,31 @@
+<view class="container">
+  <block wx:if="{{!finished}}">
+    <view class="progress">
+      <view class="progress-text">第 {{step+1}} / {{total}} 题</view>
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{(step+1) * 100 / total}}%"></view>
+      </view>
+    </view>
+    <view class="question">{{questions[step].q}}</view>
+    <view class="options">
+      <button
+        class="option-btn"
+        wx:for="{{questions[step].options}}"
+        wx:for-item="opt"
+        wx:key="text"
+        bindtap="chooseOption"
+        data-score="{{opt.score}}"
+      >{{opt.text}}</button>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="result">
+      <view class="result-title">{{result.title}}</view>
+      <view class="result-desc">{{result.desc}}</view>
+      <button class="action-btn primary" bindtap="copyResult">复制结果</button>
+      <button class="action-btn" bindtap="restart">再来一次</button>
+      <button class="action-btn" bindtap="goBack">返回首页</button>
+    </view>
+  </block>
+</view>
