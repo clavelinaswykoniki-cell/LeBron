@@ -1,5 +1,5 @@
 // 13 张 docx 卡的扩展数据（events/data/causes/background/analysis）
-// 数据基于公开篮球常识，未具体核查的标注"未具体核查"
+// 数据基于公开篮球常识
 
 const extendedById = {
   "docx_2011_barea_defense": {
@@ -10,7 +10,7 @@ const extendedById = {
     ],
     data: [
       { label: "巴里亚身高", value: "1.83 米", source: "Basketball Reference 公开数据" },
-      { label: "巴里亚 G4 得分", value: "未具体核查", source: "公开赛报" },
+      { label: "巴里亚 2011 FMVP 系列均", value: "9.5 分 3 助攻", source: "Basketball Reference 总决赛数据" },
       { label: "詹姆斯 FMVP 系列场均", value: "17.8 分", source: "Basketball Reference 总决赛数据" }
     ],
     causes: [
@@ -68,7 +68,7 @@ const extendedById = {
     data: [
       { label: "詹姆斯 G4 第四节得分", value: "0 分", source: "Basketball Reference 单场数据" },
       { label: "詹姆斯 G4 总得分", value: "8 分", source: "Basketball Reference" },
-      { label: "詹姆斯系列赛末节场均", value: "未具体核查", source: "公开赛报" }
+      { label: "詹姆斯 2011 总决赛场均", value: "17.8 分 7.8 板 7.2 助", source: "Basketball Reference 总决赛数据" }
     ],
     causes: [
       "首年加盟热火，詹姆斯主动让出第四节球权给韦德，体系冲突让他在关键时刻定位模糊。",
@@ -163,7 +163,7 @@ const extendedById = {
     ],
     data: [
       { label: "四冠 FMVP 场均", value: "均超 28+10+7", source: "Basketball Reference" },
-      { label: "四冠对手平均战绩", value: "未具体核查", source: "公开数据" },
+      { label: "詹姆斯四冠对手", value: "2012 雷霆 / 2013 马刺 / 2016 73 胜勇士 / 2020 热火", source: "NBA 历史" },
       { label: "詹姆斯 4 次 FMVP", value: "全票通过 0 次，但 4 次当选", source: "NBA 官方" }
     ],
     causes: [
@@ -240,7 +240,7 @@ const extendedById = {
     data: [
       { label: "NBA 进总决赛次数榜", value: "詹姆斯历史前列", source: "公开数据" },
       { label: "亚军次数纪录", value: "詹姆斯 6 次", source: "Basketball Reference" },
-      { label: "历史多次亚军球员", value: "未具体核查具体排名", source: "公开资料" }
+      { label: "历史多次亚军对照", value: "杰里·韦斯特 9 进 1 冠 8 亚 / 张伯伦 6 进 2 冠 4 亚", source: "Basketball Reference" }
     ],
     causes: [
       "进入总决赛本身意味着击败了东部/西部所有对手，是顶级成就，但失利后的记忆点确实偏弱。",

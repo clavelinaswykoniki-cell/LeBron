@@ -7,7 +7,7 @@ const cards = [
   // ===== Curry 系列 (4) =====
   {
     id: "compare_curry_revolution_overrated",
-    category: "库里深度对比",
+    category: "库里对比",
     claim: "库里改变篮球，所以比詹姆斯更伟大。",
     valid_part: "库里推动三分时代和小球革命，对全球篮球打法影响极大，这点不能否认。",
     logic_flaw: "改变篮球是商业和战术贡献，不能直接等同历史地位。伟大要看冠军、关键产出、队史和长期统治力,不是只看影响后辈。",
@@ -21,7 +21,7 @@ const cards = [
   },
   {
     id: "compare_curry_no_kd_only_1",
-    category: "库里深度对比",
+    category: "库里对比",
     claim: "库里没杜兰特只有 1 个冠军,根本带不了队。",
     valid_part: "库里无杜冠军在 2022 年才拿到,2017-2019 三连进决赛都有杜兰特,这是事实。",
     logic_flaw: "把无杜只 1 冠当成带不了队,忽略了 2015 年 73 胜全票 MVP 时是真正核心,以及 2022 年 FMVP 含金量。",
@@ -35,7 +35,7 @@ const cards = [
   },
   {
     id: "compare_curry_career_finals_record",
-    category: "库里深度对比",
+    category: "库里对比",
     claim: "库里 7 进总决赛 4 冠胜率比詹姆斯 10 进 4 冠高,库里更强。",
     valid_part: "库里 7 进 4 冠的胜率确实在数据上高于詹姆斯 10 进 4 冠。",
     logic_flaw: "用胜率比 7 进 vs 10 进,样本量不同,而且忽略了一个事实: 库里的 7 次全部是顶级阵容下进的,詹姆斯多次以中等阵容硬带进决赛。",
@@ -49,7 +49,7 @@ const cards = [
   },
   {
     id: "compare_curry_clutch_better",
-    category: "库里深度对比",
+    category: "库里对比",
     claim: "库里关键球比詹姆斯强,投得更准。",
     valid_part: "库里关键时刻三分命中率长期是顶级,远投威慑力极大。",
     logic_flaw: "关键球只看终结投篮,忽略了关键时刻的传球、突破吸引和创造空位。詹姆斯关键时刻更多的是带队 G7 翻盘和压力下的复合产出。",
@@ -65,7 +65,7 @@ const cards = [
   // ===== Durant 系列 (4) =====
   {
     id: "compare_kd_pure_scorer_better",
-    category: "杜兰特深度对比",
+    category: "杜兰特对比",
     claim: "杜兰特纯得分手历史第一,詹姆斯比不了。",
     valid_part: "杜兰特身高+投射+脚步的纯得分组合确实是历史级,投篮天花板极高。",
     logic_flaw: "把纯得分手单项压过詹姆斯综合履历,是用单一维度做总评。杜的纯得分确实强,但持续性、领袖力、组织负荷詹姆斯更全。",
@@ -79,7 +79,7 @@ const cards = [
   },
   {
     id: "compare_kd_chose_warriors",
-    category: "杜兰特深度对比",
+    category: "杜兰特对比",
     claim: "杜兰特抱团比詹姆斯更恶劣,无可洗白。",
     valid_part: "杜兰特 2016 年加入刚刚 73 胜的勇士,主动选择历史级球队,在抱团叙事上确实更激进。",
     logic_flaw: "比较两人抱团时,要看抱团时的处境、年龄和加入对象级别。詹姆斯 2010 去热火时是 25 岁、零冠;杜兰特 2016 加入勇士已是 28 岁,且加入的是刚刚 73 胜的卫冕争冠球队。",
@@ -93,7 +93,7 @@ const cards = [
   },
   {
     id: "compare_kd_finals_record",
-    category: "杜兰特深度对比",
+    category: "杜兰特对比",
     claim: "杜兰特 5 进总决赛 2 冠胜率比詹姆斯 10 进 4 冠还高。",
     valid_part: "杜兰特进决赛胜率上是 2/5,数据上确实高于詹姆斯 4/10。",
     logic_flaw: "5 进 vs 10 进样本量差一倍,胜率简单比较不公平。10 次稳定带队到决赛本身是更高量级的数据。",
@@ -107,7 +107,7 @@ const cards = [
   },
   {
     id: "compare_kd_irrelevant_post_warriors",
-    category: "杜兰特深度对比",
+    category: "杜兰特对比",
     claim: "杜兰特离开勇士后再没进过总决赛,说明他靠勇士。",
     valid_part: "杜兰特离开勇士后篮网、太阳、火箭都没能再进决赛,这是事实。",
     logic_flaw: "用一段时期的结果直接定性整个生涯。杜兰特离开勇士后多次受伤,且加盟篮网时阵容化学反应也是大问题,要看完整背景。",
@@ -123,7 +123,7 @@ const cards = [
   // ===== Jokic 系列 (3) =====
   {
     id: "compare_jokic_single_core_champion",
-    category: "约基奇深度对比",
+    category: "约基奇对比",
     claim: "约基奇单核夺冠,比詹姆斯靠抱团更伟大。",
     valid_part: "约基奇 2023 年夺冠时掘金确实没有传统三巨头标签,他是绝对核心。",
     logic_flaw: "把约基奇说成单核忽略了穆雷、小贾米森、戈登、KCP 这些角色球员的质量。同时詹姆斯多次也是绝对核心。",
@@ -137,7 +137,7 @@ const cards = [
   },
   {
     id: "compare_jokic_efficiency_better",
-    category: "约基奇深度对比",
+    category: "约基奇对比",
     claim: "约基奇效率比詹姆斯高得多,所以约基奇更强。",
     valid_part: "约基奇巅峰高阶效率数据 (PER、TS%、BPM) 确实在历史前列。",
     logic_flaw: "中锋位和锋线位的对位强度、防守压力、出手类型都不同。中锋本身就是历史上效率最高的位置。",
@@ -151,7 +151,7 @@ const cards = [
   },
   {
     id: "compare_jokic_no_drama",
-    category: "约基奇深度对比",
+    category: "约基奇对比",
     claim: "约基奇不闹事不挑事,詹姆斯却是 LeGM,所以约基奇更纯粹。",
     valid_part: "约基奇低调、不操控阵容,场外形象确实更纯粹,这是他的人格魅力。",
     logic_flaw: "把场外性格当历史地位指标,是把性格和球场履历混在一起。大牌话语权在 NBA 是时代必然,乔丹、科比时代也都有。",
@@ -167,7 +167,7 @@ const cards = [
   // ===== Giannis 系列 (3) =====
   {
     id: "compare_giannis_real_single_core",
-    category: "字母哥深度对比",
+    category: "字母哥对比",
     claim: "字母哥是真单核夺冠,詹姆斯都靠队友。",
     valid_part: "字母哥 2021 年 G6 砍下 50 分锁定冠军,个人英雄表演级别极高。",
     logic_flaw: "字母哥所谓的真单核夸大了。米德尔顿、霍勒迪都是全明星级别队友,而且 2021 决赛对手是缺人的太阳。",
@@ -181,7 +181,7 @@ const cards = [
   },
   {
     id: "compare_giannis_physical_only",
-    category: "字母哥深度对比",
+    category: "字母哥对比",
     claim: "字母哥纯靠身体,詹姆斯也是身体流。",
     valid_part: "字母哥确实身体爆炸是核心武器,这种打法和詹姆斯巅峰确实有相似性。",
     logic_flaw: "把詹姆斯简化为只靠身体,忽略了他的视野、传球、三分、罚球和球商。同样身体流,詹姆斯多了几个技能。",
@@ -195,7 +195,7 @@ const cards = [
   },
   {
     id: "compare_giannis_no_signature_move",
-    category: "字母哥深度对比",
+    category: "字母哥对比",
     claim: "字母哥也没招牌动作,但没人说他,只针对詹姆斯不公平。",
     valid_part: "字母哥确实主要靠身体冲击,纯技术招牌动作不算特别突出,这是事实。",
     logic_flaw: "这个论点的论证方向是对的,但目标错了。这是用来反驳没招牌动作 = 历史地位低的标准,而不是用来证明字母哥强。",
@@ -211,7 +211,7 @@ const cards = [
   // ===== Wembanyama 未来超詹 (3) =====
   {
     id: "compare_wemby_future_better",
-    category: "文班亚马深度对比",
+    category: "文班亚马对比",
     claim: "文班未来一定超越詹姆斯,数据天花板更高。",
     valid_part: "文班的身高+技术+协防确实是历史罕见组合,理论天花板很高。",
     logic_flaw: "期望不等于已发生。历史排名只能算已完成的履历,不能预支未来。",
@@ -225,7 +225,7 @@ const cards = [
   },
   {
     id: "compare_wemby_height_unfair",
-    category: "文班亚马深度对比",
+    category: "文班亚马对比",
     claim: "文班亚马 224cm 身高太逆天,这种天赋詹姆斯比不了。",
     valid_part: "文班 224cm+顶级运动能力+技术包确实是历史罕见的身体天赋组合。",
     logic_flaw: "身高不直接决定历史地位。NBA 历史上很多超高球员没成为历史前列,身高是天赋,不是冠军。",
@@ -239,7 +239,7 @@ const cards = [
   },
   {
     id: "compare_wemby_better_already",
-    category: "文班亚马深度对比",
+    category: "文班亚马对比",
     claim: "文班数据已经比詹姆斯新秀更好,起点更高。",
     valid_part: "文班场均数据,尤其是盖帽和三分占比,确实在新秀级别非常突出。",
     logic_flaw: "比新秀数据要看场均、效率、还有带队赢球。詹姆斯新秀就把骑士从烂队带成季后赛边缘,带队价值不能只看个人数据。",
@@ -255,7 +255,7 @@ const cards = [
   // ===== Tatum / 现役 (3) =====
   {
     id: "compare_tatum_2024_champion",
-    category: "塔图姆深度对比",
+    category: "塔图姆对比",
     claim: "塔图姆 24 年夺冠,26 岁就 1 冠了,未来必超詹。",
     valid_part: "塔图姆 26 岁就拿到了冠军,起步年龄确实比詹姆斯第一冠 (27 岁) 还早一年。",
     logic_flaw: "1 冠 26 岁还远不能比詹姆斯 4 冠+FMVP+三队夺冠的完整履历。期望和已完成是两件事。",
