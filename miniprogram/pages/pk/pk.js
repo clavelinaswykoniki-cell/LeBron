@@ -1,9 +1,12 @@
 const duel = require("../../utils/duel")
+const safety = require("../../utils/safety")
+const { tactileFeedback } = require("../../utils/feedback")
 
 Page({
   data: {
     match: null,
     step: 0,
+    totalQuestions: 0,
     answers: [],
     selectedOption: null,
     showResult: false,
@@ -18,6 +21,7 @@ Page({
       match,
       stats,
       step: 0,
+      totalQuestions: (match && match.questions) ? match.questions.length : 0,
       answers: [],
       selectedOption: null,
       showResult: false,
@@ -26,18 +30,19 @@ Page({
   },
 
   chooseOption(e) {
-    const index = e.currentTarget.dataset.index
+    const index = Number(e.currentTarget.dataset.index)
+    if (Number.isNaN(index)) return
+    tactileFeedback({ vibrate: true, toast: "" })
     this.setData({ selectedOption: index })
   },
 
   confirmAnswer() {
-    const { selectedOption, answers, step, match } = this.data
-    if (selectedOption === null || selectedOption === undefined) {
-      return
-    }
+    const { selectedOption, answers, step, match, totalQuestions } = this.data
+    if (selectedOption === null || selectedOption === undefined) return
+    tactileFeedback({ vibrate: true, toast: "" })
     const nextAnswers = answers.concat([selectedOption])
     const nextStep = step + 1
-    if (nextStep >= 5) {
+    if (nextStep >= totalQuestions) {
       const result = duel.submitMatch(match.matchId, nextAnswers, match.questions)
       const stats = duel.getStats()
       this.setData({
@@ -58,10 +63,12 @@ Page({
   },
 
   restart() {
+    tactileFeedback({ vibrate: true, toast: "" })
     const match = duel.startMatch()
     this.setData({
       match,
       step: 0,
+      totalQuestions: (match && match.questions) ? match.questions.length : 0,
       answers: [],
       selectedOption: null,
       showResult: false,
@@ -70,19 +77,15 @@ Page({
   },
 
   goLeaderboard() {
-    wx.navigateTo({ url: '/pages/leaderboard/leaderboard' })
+    tactileFeedback({ vibrate: true, toast: "" })
+    safety.safeNavigate("/pages/leaderboard/leaderboard", "排行榜打开失败")
   },
 
   shareResult() {
     const score = this.data.result ? this.data.result.score : 0
-    wx.setClipboardData({
-      data: '我在詹黑逻辑拆解器 PK 拿了 ' + score + ' 分，来挑战我！',
-      success: () => wx.showToast({ title: '战绩已复制', icon: 'success' }),
-      fail: () => wx.showToast({ title: '复制失败', icon: 'none' })
-    })
-  },
-
-  goBack() {
-    wx.navigateBack()
+    safety.safeCopy(
+      "我在詹黑逻辑拆解器 PK 拿了 " + score + " 分，来挑战我！",
+      "战绩已复制"
+    )
   }
 })

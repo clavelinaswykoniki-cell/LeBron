@@ -1,8 +1,9 @@
 /**
  * duel.js — 段位对抗核心（PK 答题 + 排行榜 + 战绩记录）
  *
- * v2.3 用 mock 数据 + localStorage。后端备案完成后把 USE_MOCK 改成 false，
- * 实现里替换成 wx.request 调 ECS API 即可，调用方不变。
+ * v2.4 全部用本地 mock 数据 + localStorage。后端备案完成后，把每个
+ * 暴露函数（getLeaderboard / getMyRank / startMatch / submitMatch）的
+ * 内部替换为 wx.request 调 ECS API 即可。调用方契约不变。
  *
  * 数据契约（前端 / 后端通用）：
  *   getLeaderboard()      → Array<{rank, name, avatar, viewCount, copyCount, score}>
@@ -14,7 +15,10 @@
 
 const arsenal = require("../data/arsenal")
 
-const USE_MOCK = true
+// 顶部一次性 require progression，避免重复 require + 错误吞噬
+let progression = null
+try { progression = require("./progression") } catch (e) {}
+
 const HISTORY_KEY = "lbr_duel_history"
 const MOCK_LEADERBOARD_KEY = "lbr_mock_leaderboard"
 
@@ -50,9 +54,10 @@ const MOCK_NAMES = [
 const MOCK_AVATARS = ["🦁","👑","🏆","🐐","💍","⛹️","🏀","🌟","💫","✨","🔥","⚡"]
 
 function _rankFor(score) {
+  const safe = Math.max(0, typeof score === "number" && !isNaN(score) ? score : 0)
   let tier = RANK_TIERS[0]
   for (let i = 0; i < RANK_TIERS.length; i++) {
-    if (RANK_TIERS[i].threshold <= score) tier = RANK_TIERS[i]
+    if (RANK_TIERS[i].threshold <= safe) tier = RANK_TIERS[i]
   }
   return tier
 }
@@ -96,13 +101,14 @@ function _getOrCreateMockLeaderboard() {
 }
 
 function _getMyScore() {
-  let progression = null
-  try { progression = require("./progression") } catch (e) {}
   if (!progression || typeof progression.getCurrentRank !== "function") return 0
   const snap = progression.getCurrentRank()
   // 综合分：view × 10 + copy × 5 + 战绩历史最高 × 3
   const history = getDuelHistory()
-  const bestPk = history.length ? Math.max.apply(null, history.map((h) => h.score)) : 0
+  const validScores = history
+    .map((h) => h && h.score)
+    .filter((s) => typeof s === "number" && !isNaN(s))
+  const bestPk = validScores.length ? Math.max.apply(null, validScores) : 0
   return (snap.viewCount || 0) * 10 + (snap.copyCount || 0) * 5 + bestPk * 3
 }
 
@@ -129,12 +135,13 @@ function getLeaderboard() {
     score: myScore,
     isMe: true
   }
-  try {
-    const progression = require("./progression")
-    const snap = progression.getCurrentRank()
-    myEntry.viewCount = snap.viewCount || 0
-    myEntry.copyCount = snap.copyCount || 0
-  } catch (e) {}
+  if (progression && typeof progression.getCurrentRank === "function") {
+    try {
+      const snap = progression.getCurrentRank()
+      myEntry.viewCount = snap.viewCount || 0
+      myEntry.copyCount = snap.copyCount || 0
+    } catch (e) {}
+  }
 
   const all = players.concat([myEntry]).sort((a, b) => b.score - a.score)
   all.forEach((p, i) => { p.rank = i + 1 })
@@ -170,16 +177,20 @@ function _pickRandomCards(n) {
 }
 
 function _generateDistractors(card, allCards) {
-  // 抽 3 张其他卡的 short_reply 作为干扰项
+  // 抽 3 张其他卡的 short_reply 作为干扰项。最多尝试 50 次避免死循环。
   const out = []
   const used = { [card.id]: true }
-  while (out.length < 3) {
+  let attempts = 0
+  while (out.length < 3 && attempts < 50) {
+    attempts += 1
     const idx = Math.floor(Math.random() * allCards.length)
     const c = allCards[idx]
     if (!c || used[c.id] || !c.short_reply) continue
     used[c.id] = true
     out.push(c.short_reply)
   }
+  // 凑不够 3 个就用占位符（极端情况下 allCards 不足）
+  while (out.length < 3) out.push("（暂无可选项）")
   return out
 }
 
@@ -264,19 +275,20 @@ function clearDuelHistory() {
 
 function getStats() {
   const history = getDuelHistory()
-  if (!history.length) return { total: 0, best: 0, avg: 0, wins: 0 }
-  const scores = history.map((h) => h.score)
+  const validScores = history
+    .map((h) => h && h.score)
+    .filter((s) => typeof s === "number" && !isNaN(s))
+  if (!validScores.length) return { total: history.length, best: 0, avg: 0, wins: 0 }
   return {
     total: history.length,
-    best: Math.max.apply(null, scores),
-    avg: Math.round(scores.reduce((a, b) => a + b, 0) / scores.length),
-    wins: history.filter((h) => h.score >= 60).length
+    best: Math.max.apply(null, validScores),
+    avg: Math.round(validScores.reduce((a, b) => a + b, 0) / validScores.length),
+    wins: validScores.filter((s) => s >= 60).length
   }
 }
 
 module.exports = {
   RANK_TIERS,
-  USE_MOCK,
   getLeaderboard,
   getMyRank,
   startMatch,

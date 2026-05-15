@@ -3,10 +3,10 @@
   <!-- 答题中 -->
   <view wx:if="{{!showResult}}" class="quiz-wrap">
     <view class="progress-row">
-      <text class="progress-text">第 {{step + 1}} / 5 题</text>
+      <text class="progress-text">第 {{step + 1}} / {{totalQuestions}} 题</text>
     </view>
     <view class="progress-bar">
-      <view class="progress-fill" style="width: {{(step + 1) * 20}}%;"></view>
+      <view class="progress-fill" style="width: {{((step + 1) * 100) / totalQuestions}}%;"></view>
     </view>
 
     <view class="card">

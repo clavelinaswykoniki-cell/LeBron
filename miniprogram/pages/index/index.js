@@ -174,6 +174,7 @@ Page({
     ],
     rank: null,
     menuEntries: [
+      { id: "daily", label: "每日一战", emoji: "🌅", url: "/pages/daily/daily" },
       { id: "leaderboard", label: "段位排行", emoji: "🏅", url: "/pages/leaderboard/leaderboard" },
       { id: "pk", label: "PK 对战", emoji: "⚔️", url: "/pages/pk/pk" },
       { id: "about", label: "我的段位", emoji: "🏆", url: "/pages/about/about" },
