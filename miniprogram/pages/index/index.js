@@ -40,10 +40,12 @@ function wrapCard(card, alias) {
 function normalizeResults(results) {
   return results.map((item, index) => {
     const cardId = item.card && item.card.id
+    const extended = cardId ? extendedById[cardId] : null
     return {
       resultKey: item.resultKey || cardId || `${item.category || "result"}_${index}`,
       isFavorited: cardId ? storage.isFavorited(cardId) : false,
-      hasExtended: cardId ? !!extendedById[cardId] : false,
+      hasExtended: !!extended,
+      extendedDetail: extended || null,
       ...item
     }
   })
@@ -95,22 +97,26 @@ function copyToClipboard(text, title) {
 
 function trackCardViews(results) {
   if (!results || !results.length) return
+  // 一次只触发一个升段 / 勋章 toast，避免多卡同时上屏导致 toast 互相抢占
+  let firstRankUp = null
+  let firstBadge = null
   results.forEach((item) => {
     if (!item || !item.card) return
     try {
       const { rankUp, badgesUnlocked } = progression.recordCardView(item.card.id, item.card.category)
-      if (rankUp) {
-        const snapshot = progression.getCurrentRank()
-        setTimeout(() => {
-          wx.showToast({ title: "✨ 升段：" + snapshot.rank.name, icon: "none", duration: 2000 })
-        }, 800)
-      } else if (badgesUnlocked && badgesUnlocked.length) {
-        setTimeout(() => {
-          wx.showToast({ title: "🏆 解锁勋章：" + badgesUnlocked[0].name, icon: "none", duration: 1800 })
-        }, 800)
-      }
+      if (rankUp && !firstRankUp) firstRankUp = progression.getCurrentRank()
+      if (!firstBadge && badgesUnlocked && badgesUnlocked.length) firstBadge = badgesUnlocked[0]
     } catch (e) {}
   })
+  if (firstRankUp) {
+    setTimeout(() => {
+      wx.showToast({ title: "✨ 升段：" + firstRankUp.rank.name, icon: "none", duration: 2000 })
+    }, 800)
+  } else if (firstBadge) {
+    setTimeout(() => {
+      wx.showToast({ title: "🏆 解锁勋章：" + firstBadge.name, icon: "none", duration: 1800 })
+    }, 800)
+  }
 }
 
 function tapFeedback() {
@@ -459,9 +465,9 @@ Page({
               fail: () => wx.showToast({ title: "保存失败（需要相册权限）", icon: "none" })
             })
           }
-          this.setData({ shareCanvasVisible: false })
         },
-        fail: () => this.setData({ shareCanvasVisible: false })
+        fail: () => {},
+        complete: () => this.setData({ shareCanvasVisible: false })
       })
     }).catch(() => {
       wx.showToast({ title: "分享图生成失败", icon: "none" })

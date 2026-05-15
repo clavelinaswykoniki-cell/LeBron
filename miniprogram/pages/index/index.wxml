@@ -254,6 +254,43 @@
           <view class="section-title">视频口播版</view>
           <view class="reply">{{item.card.video_script}}</view>
         </view>
+
+        <block wx:if="{{item.extendedDetail}}">
+          <view wx:if="{{item.extendedDetail.events.length}}" class="section">
+            <view class="section-title">📅 事件时间线</view>
+            <view wx:for="{{item.extendedDetail.events}}" wx:key="title" wx:for-item="ev" class="ext-event">
+              <text class="ext-year">{{ev.year}}</text>
+              <view class="ext-event-body">
+                <view class="ext-event-title">{{ev.title}}</view>
+                <view class="ext-event-summary">{{ev.summary}}</view>
+              </view>
+            </view>
+          </view>
+
+          <view wx:if="{{item.extendedDetail.data.length}}" class="section">
+            <view class="section-title">📊 关键数据</view>
+            <view wx:for="{{item.extendedDetail.data}}" wx:key="label" wx:for-item="d" class="ext-data-row">
+              <text class="ext-data-label">{{d.label}}</text>
+              <text class="ext-data-value">{{d.value}}</text>
+              <text class="ext-data-source">{{d.source}}</text>
+            </view>
+          </view>
+
+          <view wx:if="{{item.extendedDetail.causes.length}}" class="section">
+            <view class="section-title">🔎 成因分析</view>
+            <view wx:for="{{item.extendedDetail.causes}}" wx:key="*this" wx:for-item="c" class="ext-cause">{{c}}</view>
+          </view>
+
+          <view wx:if="{{item.extendedDetail.background}}" class="section">
+            <view class="section-title">🌍 时代背景</view>
+            <view class="reply">{{item.extendedDetail.background}}</view>
+          </view>
+
+          <view wx:if="{{item.extendedDetail.analysis}}" class="section">
+            <view class="section-title">🎯 专业拆解</view>
+            <view class="reply">{{item.extendedDetail.analysis}}</view>
+          </view>
+        </block>
       </block>
 
       <view wx:if="{{item.card.facts && item.card.facts.length}}" class="facts">

@@ -7,7 +7,7 @@
 
 > 微信小程序练手项目。把评论区常见的 LeBron 詹黑话术拆解成结构化反驳卡，配套段位 / 测试 H5 / 彩蛋 / 收藏 / 分享卡片等娱乐组件。
 
-**v2.1** · 175 张反驳卡 · 559 条别名 · 38 类争议分类 · 紫金湖人主题
+**v2.1** · 175 张反驳卡 · 559 条别名 · 46 类争议分类 · 紫金湖人主题
 
 ---
 
@@ -59,7 +59,7 @@ npm install
 |---|---|
 | 反驳卡 | **175 张**（base 100 + docx 50 + v2.1 新增 5 + 球星对比 20） |
 | 别名 / 短梗 | **559 条** |
-| 争议分类 | **38 类** |
+| 争议分类 | **46 类** |
 | 黑点素材库 | **10 张深度拆解**（`docs/raw-perspectives/`） + 扩展 JSON（events/data/causes/background/analysis）|
 | 已实现页面 | **9 个**（index / about / quiz / easter / privacy / history / favorites / onboarding / result）|
 | 自动化测试 | **8 个**（含 GitHub Actions CI）|

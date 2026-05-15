@@ -44,3 +44,15 @@ jobs:
 
       - name: 段位单测
         run: npm run test:progression
+
+      - name: 安全包装单测
+        run: npm run test:safety
+
+      - name: 反馈包装单测
+        run: npm run test:feedback
+
+      - name: 匹配引擎单测
+        run: npm run test:matchquery
+
+      - name: 存储工具单测
+        run: npm run test:storage

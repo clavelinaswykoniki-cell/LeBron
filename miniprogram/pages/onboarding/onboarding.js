@@ -1,7 +1,7 @@
 const STEPS = [
   {
     title: "欢迎来到弹药库",
-    desc: "詹黑逻辑拆解器 v2.1\n150+ 反驳卡 / 441 别名 / 38 类争议",
+    desc: "詹黑逻辑拆解器 v2.1\n175 反驳卡 / 559 别名 / 46 类争议",
     emoji: "👑",
     cta: "下一步"
   },
@@ -38,7 +38,9 @@ Page({
   skip() { this.finish() },
   finish() {
     try {
-      if (wx && wx.setStorageSync) wx.setStorageSync("lbr_onboarded", true)
+      if (typeof wx !== "undefined" && wx.setStorageSync) {
+        wx.setStorageSync("lbr_onboarded", true)
+      }
     } catch (e) {}
     wx.reLaunch({ url: "/pages/index/index" })
   }
