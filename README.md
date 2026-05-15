@@ -1,8 +1,13 @@
 # LeBron 詹黑逻辑拆解器
 
-> 微信小程序练手项目。把评论区常见的 LeBron 詹黑话术拆解成结构化反驳卡，配套段位 / 测试 H5 / 彩蛋等娱乐组件。
+[![CI](https://github.com/clavelinaswykoniki-cell/LeBron/actions/workflows/ci.yml/badge.svg)](https://github.com/clavelinaswykoniki-cell/LeBron/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-8%2F8%20passing-brightgreen)](scripts/)
+[![Cards](https://img.shields.io/badge/cards-175-fbbf24)](miniprogram/data/)
 
-**v2.0** · 150 张反驳卡 · 441 条别名 · 38 类争议分类 · 紫金湖人主题
+> 微信小程序练手项目。把评论区常见的 LeBron 詹黑话术拆解成结构化反驳卡，配套段位 / 测试 H5 / 彩蛋 / 收藏 / 分享卡片等娱乐组件。
+
+**v2.1** · 175 张反驳卡 · 559 条别名 · 38 类争议分类 · 紫金湖人主题
 
 ---
 
@@ -52,11 +57,12 @@ npm install
 
 | 指标 | 数量 |
 |---|---|
-| 反驳卡 | **150 张**（base 100 + docx 50） |
-| 别名 / 短梗 | **441 条** |
+| 反驳卡 | **175 张**（base 100 + docx 50 + v2.1 新增 5 + 球星对比 20） |
+| 别名 / 短梗 | **559 条** |
 | 争议分类 | **38 类** |
-| 黑点素材库 | **10 张深度拆解**（`docs/raw-perspectives/`） |
-| 已实现页面 | **5 个**（index / about / quiz / easter / privacy） |
+| 黑点素材库 | **10 张深度拆解**（`docs/raw-perspectives/`） + 扩展 JSON（events/data/causes/background/analysis）|
+| 已实现页面 | **9 个**（index / about / quiz / easter / privacy / history / favorites / onboarding / result）|
+| 自动化测试 | **8 个**（含 GitHub Actions CI）|
 
 ---
 
@@ -80,6 +86,18 @@ npm install
 - ✅ **隐私政策页**：5 段标准模板（`pages/privacy/`）
 - ✅ **错误兜底**：复制失败 / 空 query / 跳转失败 Toast（`utils/safety.js`）
 
+### v2.1 工程深化 + 内容扩展 + 分发就绪
+- ✅ **GitHub Actions CI**：每次 push / PR 自动跑 5 个测试（matrix: node 18, 20）
+- ✅ **OSS 仪式三件套**：LICENSE / CONTRIBUTING / CHANGELOG
+- ✅ **3 个新单元测试**：test-safety / test-feedback / test-matchquery（共 20 个 assertions）
+- ✅ **扩展卡 JSON**：10 张深度素材卡 events/data/causes/background/analysis（`data/rebuttal_cards_extended.js`）
+- ✅ **5 张新黑点卡**：泡泡冠军 / 21 后湖人 / 没招牌动作 / 总决赛胜率 / G7 表现
+- ✅ **20 张球星深度对比卡**：Curry / Durant / Jokic / Giannis / Wembanyama / Tatum
+- ✅ **搜索历史 + 收藏页**：localStorage 持久化（`pages/{history,favorites}/`）
+- ✅ **分享卡片生成**：长按结果卡 → wx.canvas 生成精美卡图 → 保存相册
+- ✅ **首页 onboarding**：第一次打开 4 步引导（`pages/onboarding/`）
+- ✅ **分发包**：LANDING_PAGE.html + PRESS_KIT.md + ROADMAP.md
+
 ---
 
 ## 跑测试
@@ -90,9 +108,12 @@ npm run test:match      # 50 个高频黑点 → 命中卡匹配验证
 npm run test:corpus     # 语料完整性 + 别名数 + review_needed 校验
 npm run test:ai-fallback # CloudBase 失败时本地兜底验证
 npm run test:progression # progression.js 单元测试（7 个用例）
+npm run test:safety     # safety.js 单元测试（6 个用例）
+npm run test:feedback   # feedback.js 单元测试（6 个用例）
+npm run test:matchquery # matchQuery.js 单元测试（8 个用例）
 ```
 
-**5/5 通过**即可。
+**8/8 通过**即可。GitHub Actions CI 会在每次 push / PR 自动跑。
 
 ---
 

@@ -3,8 +3,12 @@ const { generateEnhancedReply, generateWithLocalCard } = require("../../utils/ll
 const { tactileFeedback } = require("../../utils/feedback")
 const progression = require("../../utils/progression")
 const safety = require("../../utils/safety")
+const storage = require("../../utils/storage")
+const cardShare = require("../../utils/cardShare")
 const arsenal = require("../../data/arsenal")
 const corePositions = require("../../data/core_positions")
+
+const extendedById = arsenal.extendedById || {}
 
 const allCards = arsenal.cards
 
@@ -34,10 +38,15 @@ function wrapCard(card, alias) {
 }
 
 function normalizeResults(results) {
-  return results.map((item, index) => ({
-    resultKey: item.resultKey || (item.card && item.card.id) || `${item.category || "result"}_${index}`,
-    ...item
-  }))
+  return results.map((item, index) => {
+    const cardId = item.card && item.card.id
+    return {
+      resultKey: item.resultKey || cardId || `${item.category || "result"}_${index}`,
+      isFavorited: cardId ? storage.isFavorited(cardId) : false,
+      hasExtended: cardId ? !!extendedById[cardId] : false,
+      ...item
+    }
+  })
 }
 
 function buildCardText(item) {
@@ -162,12 +171,41 @@ Page({
       { id: "about", label: "我的段位", emoji: "🏆", url: "/pages/about/about" },
       { id: "quiz", label: "球迷测试", emoji: "🧠", url: "/pages/quiz/quiz" },
       { id: "easter", label: "23号秘藏", emoji: "👑", url: "/pages/easter/easter" },
+      { id: "history", label: "搜索历史", emoji: "🕒", url: "/pages/history/history" },
+      { id: "favorites", label: "我的收藏", emoji: "⭐", url: "/pages/favorites/favorites" },
       { id: "privacy", label: "隐私说明", emoji: "🛡️", url: "/pages/privacy/privacy" }
-    ]
+    ],
+    shareCanvasVisible: false
   },
 
-  onLoad() {
-    const seed = "8分"
+  onLoad(options) {
+    // 首次打开 → onboarding
+    try {
+      const onboarded = (typeof wx !== "undefined" && wx.getStorageSync)
+        ? wx.getStorageSync("lbr_onboarded")
+        : true
+      if (!onboarded) {
+        wx.reLaunch({ url: "/pages/onboarding/onboarding" })
+        return
+      }
+    } catch (e) {}
+
+    // 支持 query 参数 ?seed=... 或 ?focus=cardId
+    let seed = "8分"
+    if (options && options.seed) {
+      try { seed = decodeURIComponent(options.seed) } catch (e) {}
+    } else if (options && options.focus) {
+      try {
+        const focusId = decodeURIComponent(options.focus)
+        const focusCard = allCards.find((c) => c.id === focusId)
+        if (focusCard) {
+          this.setData({ query: focusCard.tags && focusCard.tags[0] || focusCard.category })
+          this.setSearchResults([wrapCard(focusCard, "我的收藏")])
+          this.refreshRank()
+          return
+        }
+      } catch (e) {}
+    }
     this.setData({ query: seed })
     this.setSearchResults(matchQuery(seed))
     this.refreshRank()
@@ -244,6 +282,7 @@ Page({
       this.setSearchResults([])
       return
     }
+    try { storage.recordSearchHistory(q) } catch (e) {}
     this.setSearchResults(matchQuery(q))
   },
 
@@ -369,5 +408,64 @@ Page({
     if (!url) return
     tapFeedback()
     safety.safeNavigate(url, "页面打开失败")
+  },
+
+  onToggleFavorite(event) {
+    const index = Number(event.currentTarget.dataset.index)
+    if (Number.isNaN(index)) return
+    const item = this.data.results[index]
+    if (!item || !item.card || !item.card.id) return
+    tapFeedback()
+    try {
+      const snapshot = {
+        id: item.card.id,
+        category: item.card.category,
+        claim: item.card.claim,
+        short_reply: item.card.short_reply
+      }
+      const nowFavorited = storage.toggleFavorite(item.card.id, snapshot)
+      const results = this.data.results.map((r, i) =>
+        i === index ? { ...r, isFavorited: nowFavorited } : r
+      )
+      const allResults = this.data.allResults.map((r) =>
+        r.card && r.card.id === item.card.id ? { ...r, isFavorited: nowFavorited } : r
+      )
+      this.setData({ results, allResults })
+      wx.showToast({
+        title: nowFavorited ? "已收藏" : "已取消收藏",
+        icon: nowFavorited ? "success" : "none"
+      })
+    } catch (e) {}
+  },
+
+  onShareCardLongPress(event) {
+    const index = Number(event.currentTarget.dataset.index)
+    if (Number.isNaN(index)) return
+    const item = this.data.results[index]
+    if (!item || !item.card) return
+    tapFeedback()
+    this.setData({ shareCanvasVisible: true })
+    cardShare.generateShareImage(item.card, {
+      canvasId: "shareCanvas",
+      pageInstance: this
+    }).then((tempFilePath) => {
+      wx.showActionSheet({
+        itemList: ["保存到相册", "取消"],
+        success: (res) => {
+          if (res.tapIndex === 0) {
+            wx.saveImageToPhotosAlbum({
+              filePath: tempFilePath,
+              success: () => wx.showToast({ title: "已保存到相册", icon: "success" }),
+              fail: () => wx.showToast({ title: "保存失败（需要相册权限）", icon: "none" })
+            })
+          }
+          this.setData({ shareCanvasVisible: false })
+        },
+        fail: () => this.setData({ shareCanvasVisible: false })
+      })
+    }).catch(() => {
+      wx.showToast({ title: "分享图生成失败", icon: "none" })
+      this.setData({ shareCanvasVisible: false })
+    })
   }
 })

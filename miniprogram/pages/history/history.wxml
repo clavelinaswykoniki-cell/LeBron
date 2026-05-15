@@ -1,0 +1,34 @@
+<view class="page">
+
+  <!-- 顶部栏 -->
+  <view class="header">
+    <view class="header-left" bindtap="goBack">‹ 返回</view>
+    <view class="header-title">搜索历史</view>
+    <view class="header-right {{empty ? 'disabled' : ''}}" bindtap="onClear">清空</view>
+  </view>
+
+  <!-- 列表 -->
+  <view class="list" wx:if="{{!empty}}">
+    <view
+      class="item"
+      wx:for="{{items}}"
+      wx:key="at"
+      data-q="{{item.query}}"
+      bindtap="onItemTap"
+    >
+      <view class="item-main">
+        <view class="item-query">{{item.query}}</view>
+        <view class="item-time">{{item.relTime}}</view>
+      </view>
+      <view class="item-arrow">›</view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:if="{{empty}}">
+    <view class="empty-title">还没搜过</view>
+    <view class="empty-sub">去主页搜个「8 分释兵权」试试</view>
+    <button class="empty-btn" bindtap="goBack">回主页搜一发</button>
+  </view>
+
+</view>

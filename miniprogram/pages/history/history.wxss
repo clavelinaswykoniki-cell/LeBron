@@ -1,0 +1,126 @@
+/* pages/history/history.wxss — 紫金主题 */
+
+.page {
+  min-height: 100vh;
+  background: #1a0a2e;
+  padding: 24rpx 24rpx 64rpx;
+  box-sizing: border-box;
+  color: #ffffff;
+}
+
+/* ---- 顶部栏 ---- */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12rpx 4rpx 28rpx;
+}
+
+.header-left,
+.header-right {
+  font-size: 28rpx;
+  color: #ffd700;
+  padding: 12rpx 16rpx;
+}
+
+.header-left:active,
+.header-right:active {
+  opacity: 0.6;
+}
+
+.header-right.disabled {
+  color: rgba(255, 215, 0, 0.3);
+  pointer-events: none;
+}
+
+.header-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #ffd700;
+  letter-spacing: 3rpx;
+  text-shadow: 0 2rpx 12rpx rgba(255, 215, 0, 0.3);
+}
+
+/* ---- 列表 ---- */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1rpx solid rgba(255, 215, 0, 0.18);
+  border-radius: 16rpx;
+  padding: 24rpx 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.25);
+}
+
+.item:active {
+  background: rgba(255, 215, 0, 0.1);
+}
+
+.item-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-query {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #ffffff;
+  margin-bottom: 8rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-time {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.item-arrow {
+  font-size: 36rpx;
+  color: rgba(255, 215, 0, 0.5);
+  margin-left: 16rpx;
+}
+
+/* ---- 空状态 ---- */
+.empty {
+  margin-top: 160rpx;
+  text-align: center;
+  padding: 0 32rpx;
+}
+
+.empty-title {
+  font-size: 38rpx;
+  font-weight: 700;
+  color: #ffd700;
+  letter-spacing: 2rpx;
+  margin-bottom: 16rpx;
+}
+
+.empty-sub {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 48rpx;
+  line-height: 1.5;
+}
+
+.empty-btn {
+  background: linear-gradient(90deg, #ffd700, #ffae00);
+  color: #1a0a2e;
+  font-weight: 600;
+  font-size: 30rpx;
+  border-radius: 48rpx;
+  border: none;
+  padding: 20rpx 0;
+}
+
+.empty-btn::after {
+  border: none;
+}

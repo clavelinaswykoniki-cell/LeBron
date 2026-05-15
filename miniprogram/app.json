@@ -5,7 +5,10 @@
     "pages/about/about",
     "pages/easter/easter",
     "pages/quiz/quiz",
-    "pages/privacy/privacy"
+    "pages/privacy/privacy",
+    "pages/history/history",
+    "pages/favorites/favorites",
+    "pages/onboarding/onboarding"
   ],
   "window": {
     "navigationBarTitleText": "詹黑逻辑拆解器",

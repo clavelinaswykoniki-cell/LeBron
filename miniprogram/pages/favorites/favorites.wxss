@@ -1,0 +1,157 @@
+/* pages/favorites/favorites.wxss — 紫金主题 */
+
+.page {
+  min-height: 100vh;
+  background: #1a0a2e;
+  padding: 24rpx 24rpx 64rpx;
+  box-sizing: border-box;
+  color: #ffffff;
+}
+
+/* ---- 顶部栏 ---- */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12rpx 4rpx 28rpx;
+}
+
+.header-left,
+.header-right {
+  font-size: 28rpx;
+  color: #ffd700;
+  padding: 12rpx 16rpx;
+  min-width: 80rpx;
+}
+
+.header-right.placeholder {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.header-left:active {
+  opacity: 0.6;
+}
+
+.header-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #ffd700;
+  letter-spacing: 3rpx;
+  text-shadow: 0 2rpx 12rpx rgba(255, 215, 0, 0.3);
+}
+
+/* ---- 列表 ---- */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1rpx solid rgba(255, 215, 0, 0.22);
+  border-radius: 20rpx;
+  padding: 24rpx 24rpx 22rpx;
+  box-shadow: 0 4rpx 18rpx rgba(0, 0, 0, 0.3);
+}
+
+.card:active {
+  background: rgba(255, 215, 0, 0.08);
+}
+
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+
+.card-claim {
+  flex: 1;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #ffd700;
+  line-height: 1.4;
+  padding-right: 16rpx;
+  word-break: break-word;
+}
+
+.card-unfav {
+  font-size: 22rpx;
+  color: rgba(255, 215, 0, 0.85);
+  background: rgba(255, 215, 0, 0.12);
+  border: 1rpx solid rgba(255, 215, 0, 0.35);
+  border-radius: 999rpx;
+  padding: 6rpx 16rpx;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.card-unfav:active {
+  background: rgba(255, 215, 0, 0.25);
+}
+
+.card-reply {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.5;
+  margin-bottom: 12rpx;
+  word-break: break-word;
+}
+
+.card-reply-empty {
+  color: rgba(255, 255, 255, 0.4);
+  font-style: italic;
+}
+
+.card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.card-tag {
+  font-size: 20rpx;
+  color: rgba(255, 215, 0, 0.85);
+  background: rgba(255, 215, 0, 0.08);
+  border: 1rpx solid rgba(255, 215, 0, 0.25);
+  border-radius: 8rpx;
+  padding: 4rpx 12rpx;
+}
+
+/* ---- 空状态 ---- */
+.empty {
+  margin-top: 160rpx;
+  text-align: center;
+  padding: 0 32rpx;
+}
+
+.empty-title {
+  font-size: 38rpx;
+  font-weight: 700;
+  color: #ffd700;
+  letter-spacing: 2rpx;
+  margin-bottom: 16rpx;
+}
+
+.empty-sub {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 48rpx;
+  line-height: 1.5;
+}
+
+.empty-btn {
+  background: linear-gradient(90deg, #ffd700, #ffae00);
+  color: #1a0a2e;
+  font-weight: 600;
+  font-size: 30rpx;
+  border-radius: 48rpx;
+  border: none;
+  padding: 20rpx 0;
+}
+
+.empty-btn::after {
+  border: none;
+}

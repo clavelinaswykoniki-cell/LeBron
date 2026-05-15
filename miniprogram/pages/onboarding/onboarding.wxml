@@ -1,0 +1,15 @@
+<view class="onboarding-page">
+  <view class="dots">
+    <view wx:for="{{steps}}" wx:key="title" class="dot {{index === step ? 'active' : ''}}"></view>
+  </view>
+  <view class="card">
+    <text class="emoji">{{current.emoji}}</text>
+    <view class="title">{{current.title}}</view>
+    <view class="desc">{{current.desc}}</view>
+  </view>
+  <view class="actions">
+    <button class="primary" bindtap="next">{{current.cta}}</button>
+    <button class="ghost" bindtap="skip">跳过</button>
+  </view>
+  <view class="version">v2.1 · 练手项目</view>
+</view>

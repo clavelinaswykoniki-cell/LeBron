@@ -7,6 +7,9 @@
     "test:corpus": "node scripts/test-corpus-integrity.js",
     "test:ai-fallback": "node scripts/test-ai-enhance-fallback.js",
     "test:progression": "node scripts/test-progression.js",
+    "test:safety": "node scripts/test-safety.js",
+    "test:feedback": "node scripts/test-feedback.js",
+    "test:matchquery": "node scripts/test-matchquery.js",
     "check:syntax": "node -e \"require('./miniprogram/data/categories'); require('./miniprogram/data/aliases'); require('./miniprogram/data/aliases_docx'); require('./miniprogram/data/rebuttal_cards'); require('./miniprogram/data/rebuttal_cards_docx'); require('./miniprogram/data/arsenal'); require('./miniprogram/data/factual_sources'); require('./miniprogram/data/rebuttal_templates'); require('./miniprogram/utils/matchQuery'); require('./miniprogram/utils/llmProvider'); require('./miniprogram/utils/promptBuilder'); console.log('syntax ok')\" && node -c cloudfunctions/generateReply/index.js && node -c scripts/convert-docx-corpus.js && node -c scripts/test-corpus-integrity.js && node -c scripts/test-ai-enhance-fallback.js && node scripts/test-ui-contract.js"
   },
   "dependencies": {

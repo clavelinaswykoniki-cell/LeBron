@@ -164,13 +164,24 @@
   </view>
 
   <view wx:if="{{results.length}}" class="results">
-    <view wx:for="{{results}}" wx:key="resultKey" class="result-card gold-rim">
+    <view
+      wx:for="{{results}}"
+      wx:key="resultKey"
+      class="result-card gold-rim"
+      data-index="{{index}}"
+      bindlongpress="onShareCardLongPress"
+    >
       <view class="meta-row">
         <view class="meta-left">
           <t-tag theme="warning" variant="light" shape="round">{{item.category}}</t-tag>
           <text class="alias">命中：{{item.alias}}</text>
         </view>
         <view class="card-actions">
+          <view
+            class="fav-star {{item.isFavorited ? 'active' : ''}}"
+            data-index="{{index}}"
+            catchtap="onToggleFavorite"
+          >{{item.isFavorited ? '★' : '☆'}}</view>
           <t-button
             class="enhance-btn"
             theme="primary"
@@ -271,8 +282,16 @@
   </view>
 
   <view class="footer-note">
-    <text class="footer-text">练手项目 · v2.0 · </text>
+    <text class="footer-text">练手项目 · v2.1 · </text>
     <text class="footer-link" data-url="/pages/privacy/privacy" bindtap="onMenuTap">隐私政策</text>
   </view>
+
+  <!-- 分享卡片画布（隐藏） -->
+  <canvas
+    wx:if="{{shareCanvasVisible}}"
+    canvas-id="shareCanvas"
+    class="share-canvas"
+    style="width: 750rpx; height: 1334rpx;"
+  ></canvas>
 
 </view>

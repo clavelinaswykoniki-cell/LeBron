@@ -1,0 +1,44 @@
+<view class="page">
+
+  <!-- 顶部栏 -->
+  <view class="header">
+    <view class="header-left" bindtap="goBack">‹ 返回</view>
+    <view class="header-title">我的收藏</view>
+    <view class="header-right placeholder"></view>
+  </view>
+
+  <!-- 列表 -->
+  <view class="list" wx:if="{{!empty}}">
+    <view
+      class="card"
+      wx:for="{{items}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="onItemTap"
+    >
+      <view class="card-head">
+        <view class="card-claim">{{item.claimShort || item.id}}</view>
+        <view
+          class="card-unfav"
+          catchtap="onUnfavorite"
+          data-id="{{item.id}}"
+        >★ 取消</view>
+      </view>
+
+      <view class="card-reply" wx:if="{{item.replyShort}}">{{item.replyShort}}</view>
+      <view class="card-reply card-reply-empty" wx:else>（无内容快照）</view>
+
+      <view class="card-meta" wx:if="{{item.category}}">
+        <text class="card-tag">{{item.category}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:if="{{empty}}">
+    <view class="empty-title">收藏夹还是空的</view>
+    <view class="empty-sub">回主页给得意的反驳卡点个 ★</view>
+    <button class="empty-btn" bindtap="goBack">回主页找卡</button>
+  </view>
+
+</view>
