@@ -1,0 +1,51 @@
+<view class="pk-page">
+
+  <!-- 答题中 -->
+  <view wx:if="{{!showResult}}" class="quiz-wrap">
+    <view class="progress-row">
+      <text class="progress-text">第 {{step + 1}} / 5 题</text>
+    </view>
+    <view class="progress-bar">
+      <view class="progress-fill" style="width: {{(step + 1) * 20}}%;"></view>
+    </view>
+
+    <view class="card">
+      <view class="prompt">黑粉话术：</view>
+      <view class="claim">{{match.questions[step].prompt}}</view>
+      <view class="category-tag">{{match.questions[step].category}}</view>
+    </view>
+
+    <view class="options">
+      <view
+        wx:for="{{match.questions[step].options}}"
+        wx:key="index"
+        data-index="{{index}}"
+        bindtap="chooseOption"
+        class="option-btn {{selectedOption === index ? 'selected' : ''}}"
+      >
+        {{item}}
+      </view>
+    </view>
+
+    <button
+      class="confirm-btn"
+      bindtap="confirmAnswer"
+      disabled="{{selectedOption === null}}"
+    >确认这一题</button>
+  </view>
+
+  <!-- 结果页 -->
+  <view wx:else class="result-wrap">
+    <view class="result-score">{{result.score}}</view>
+    <view class="result-sub">{{result.correct}} / {{result.total}} 正确</view>
+    <view class="result-rank">段位 {{result.rankChange > 0 ? '+' : ''}}{{result.rankChange}}</view>
+    <view class="result-stats">总场数 {{stats.total}} / 最高 {{stats.best}} / 平均 {{stats.avg}}</view>
+
+    <view class="result-actions">
+      <button class="action-btn primary" bindtap="restart">再战一局</button>
+      <button class="action-btn" bindtap="shareResult">分享战绩</button>
+      <button class="action-btn" bindtap="goLeaderboard">看排行</button>
+    </view>
+  </view>
+
+</view>

@@ -1,0 +1,31 @@
+<view class="page">
+
+  <view class="my-rank-card" wx:if="{{myRank}}">
+    <view class="my-rank-head">我的排名</view>
+    <view class="my-rank-row">
+      <text class="my-rank-num">#{{myRank.rank}}</text>
+      <text class="my-rank-total">/ {{myRank.total}}</text>
+    </view>
+    <view class="my-rank-tier" wx:if="{{myRank.tier}}">{{myRank.tier.name}}</view>
+    <view class="my-rank-score">{{myRank.score}} 分</view>
+    <view class="my-rank-btn" bindtap="goPK">去 PK 升段</view>
+  </view>
+
+  <view class="board-title">段位排行榜</view>
+
+  <view class="board-list">
+    <view
+      wx:for="{{players}}"
+      wx:key="rank"
+      class="player-row {{item.isMe ? 'me' : ''}} {{item.rank <= 3 ? 'top3' : ''}}"
+    >
+      <text class="rank-num">{{item.rank}}</text>
+      <text class="avatar">{{item.avatar}}</text>
+      <text class="name">{{item.name}}</text>
+      <text class="score">{{item.score}}</text>
+    </view>
+  </view>
+
+  <view class="footer-tip">数据每天刷新，PK 答题可加分。</view>
+
+</view>

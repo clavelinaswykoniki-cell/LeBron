@@ -8,7 +8,9 @@
     "pages/privacy/privacy",
     "pages/history/history",
     "pages/favorites/favorites",
-    "pages/onboarding/onboarding"
+    "pages/onboarding/onboarding",
+    "pages/leaderboard/leaderboard",
+    "pages/pk/pk"
   ],
   "window": {
     "navigationBarTitleText": "詹黑逻辑拆解器",

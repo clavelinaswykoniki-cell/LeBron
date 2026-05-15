@@ -1,0 +1,159 @@
+.page {
+  min-height: 100vh;
+  background: #1a0a2e;
+  padding: 32rpx 28rpx 80rpx 28rpx;
+  box-sizing: border-box;
+}
+
+/* ----- 我的排名卡片 ----- */
+.my-rank-card {
+  padding: 36rpx;
+  border: 2rpx solid #fbbf24;
+  border-radius: 20rpx;
+  background: linear-gradient(135deg, #2d1b4e 0%, #1a0a2e 100%);
+  margin-bottom: 36rpx;
+  box-shadow: 0 4rpx 24rpx rgba(251, 191, 36, 0.18);
+}
+
+.my-rank-head {
+  color: #fbbf24;
+  font-size: 26rpx;
+  letter-spacing: 2rpx;
+  margin-bottom: 12rpx;
+}
+
+.my-rank-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
+  margin-bottom: 8rpx;
+}
+
+.my-rank-num {
+  font-size: 80rpx;
+  color: #fbbf24;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.my-rank-total {
+  font-size: 30rpx;
+  color: #b8a8d4;
+}
+
+.my-rank-tier {
+  font-size: 32rpx;
+  color: #fde68a;
+  margin-top: 8rpx;
+}
+
+.my-rank-score {
+  font-size: 28rpx;
+  color: #e5d9ff;
+  margin-top: 4rpx;
+}
+
+.my-rank-btn {
+  margin-top: 24rpx;
+  background: #fbbf24;
+  color: #1a0a2e;
+  font-size: 30rpx;
+  font-weight: 600;
+  text-align: center;
+  padding: 20rpx 0;
+  border-radius: 12rpx;
+  letter-spacing: 2rpx;
+}
+
+.my-rank-btn:active {
+  opacity: 0.85;
+}
+
+/* ----- 列表标题 ----- */
+.board-title {
+  color: #fbbf24;
+  font-size: 30rpx;
+  font-weight: 600;
+  margin: 12rpx 0 16rpx 4rpx;
+  letter-spacing: 2rpx;
+}
+
+/* ----- 排行榜列表 ----- */
+.board-list {
+  background: rgba(45, 27, 78, 0.4);
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.player-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 20rpx 24rpx;
+  border-bottom: 1rpx solid #2d1b4e;
+  color: #e5d9ff;
+}
+
+.player-row:last-child {
+  border-bottom: none;
+}
+
+.rank-num {
+  width: 60rpx;
+  font-size: 28rpx;
+  color: #b8a8d4;
+  text-align: center;
+  font-weight: 600;
+}
+
+.avatar {
+  font-size: 40rpx;
+  width: 56rpx;
+  text-align: center;
+}
+
+.name {
+  flex: 1;
+  font-size: 28rpx;
+  color: #e5d9ff;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.score {
+  font-size: 28rpx;
+  color: #c4b5e0;
+  font-weight: 500;
+  min-width: 80rpx;
+  text-align: right;
+}
+
+/* ----- 我自己高亮 ----- */
+.player-row.me {
+  background: rgba(251, 191, 36, 0.18);
+  color: #fde68a;
+}
+
+.player-row.me .rank-num,
+.player-row.me .name,
+.player-row.me .score {
+  color: #fde68a;
+  font-weight: 600;
+}
+
+/* ----- 前 3 名 ----- */
+.player-row.top3 .rank-num {
+  font-size: 36rpx;
+  color: #fbbf24;
+  font-weight: 700;
+}
+
+/* ----- 底部提示 ----- */
+.footer-tip {
+  text-align: center;
+  color: #8a7aa8;
+  font-size: 24rpx;
+  margin-top: 40rpx;
+  letter-spacing: 1rpx;
+}
