@@ -17,6 +17,7 @@ const extendedData = require("./rebuttal_cards_extended")
 const extendedP2 = require("./rebuttal_cards_extended_p2")
 const extendedV21 = require("./rebuttal_cards_extended_v2_1")
 const extendedP3 = require("./rebuttal_cards_extended_p3")
+const extendedP4 = require("./rebuttal_cards_extended_p4")
 
 /**
  * v2.1 别名采用 `{ term, card_ids, priority }` 结构（1 高 / 2 中 / 3 低）。
@@ -56,7 +57,8 @@ const extendedById = Object.assign(
   (extendedData && extendedData.extendedById) || {},
   (extendedP2 && extendedP2.extendedById) || {},
   (extendedV21 && extendedV21.extendedById) || {},
-  (extendedP3 && extendedP3.extendedById) || {}
+  (extendedP3 && extendedP3.extendedById) || {},
+  (extendedP4 && extendedP4.extendedById) || {}
 )
 
 module.exports = {
