@@ -14,7 +14,10 @@
 
 const api = require("./api")
 
+const LLM_ENHANCE_TIMEOUT_MS = 30000
+
 function generateWithLocalCard(card) {
+  if (!card) return null
   return {
     short_reply: card.short_reply,
     long_reply: card.long_reply,
@@ -23,15 +26,30 @@ function generateWithLocalCard(card) {
   }
 }
 
+/** 把字段安全 trim 成字符串；非字符串/缺失返回空串 */
+function _trimStr(v) {
+  if (typeof v !== "string") {
+    if (v == null) return ""
+    return String(v).trim()
+  }
+  return v.trim()
+}
+
+/**
+ * 把后端 reply 归一为前端可用的 4 字段对象；任一关键字段为空则视作无效返回 null。
+ */
 function normalizeEnhancedReply(reply) {
   if (!reply || typeof reply !== "object") return null
   const normalized = {
-    short_reply: String(reply.short_reply || "").trim(),
-    long_reply: String(reply.long_reply || "").trim(),
-    one_liner: String(reply.one_liner || "").trim(),
-    video_script: String(reply.video_script || "").trim()
+    short_reply:  _trimStr(reply.short_reply),
+    long_reply:   _trimStr(reply.long_reply),
+    one_liner:    _trimStr(reply.one_liner),
+    video_script: _trimStr(reply.video_script)
   }
-  if (!normalized.short_reply || !normalized.long_reply || !normalized.one_liner || !normalized.video_script) {
+  if (!normalized.short_reply
+      || !normalized.long_reply
+      || !normalized.one_liner
+      || !normalized.video_script) {
     return null
   }
   return normalized
@@ -44,17 +62,17 @@ async function generateEnhancedReply(params) {
   }
   try {
     const result = await api.post("/api/llm/enhance", {
-      userQuery: params.userQuery || "",
+      userQuery: params.userQuery,
       matchedCard: params.matchedCard || {},
       corePosition: params.corePosition || ""
-    }, { timeout: 30000 })
+    }, { timeout: LLM_ENHANCE_TIMEOUT_MS })
     if (!result || result.ok !== true) {
       console.warn("[llm] enhance 返回非 ok:", result && result.error)
       return null
     }
     return normalizeEnhancedReply(result.reply)
   } catch (e) {
-    console.warn("[llm] enhance 失败:", e.message)
+    console.warn("[llm] enhance 失败:", e && e.message)
     return null
   }
 }

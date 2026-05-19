@@ -47,6 +47,13 @@
         <t-icon name="refresh" size="32rpx" color="#552583" />
       </view>
     </view>
+
+    <!-- 「问 AI」入口：紧贴 CTA 下方，作为补充手段（多轮聊天） -->
+    <view class="mood-row" style="margin-top: 16rpx;">
+      <view class="mood-chip mood-chip-active" bindtap="onChatTap">
+        <text>问 AI · 多轮聊</text>
+      </view>
+    </view>
   </view>
 
   <!-- 风格切换（mood）：轻量 chip 行，保留 handler -->

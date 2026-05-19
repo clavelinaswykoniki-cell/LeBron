@@ -1,8 +1,8 @@
 {
   "navigationBarTitleText": "拆解结果",
-  "navigationBarBackgroundColor": "#160a31",
+  "navigationBarBackgroundColor": "#552583",
   "navigationBarTextStyle": "white",
-  "backgroundColor": "#0f172a",
+  "backgroundColor": "#f7f7f8",
   "usingComponents": {
     "t-button": "tdesign-miniprogram/button/button",
     "t-tag": "tdesign-miniprogram/tag/tag",

@@ -13,7 +13,7 @@
         <text class="banner-meta-num">{{hitCount}}</text>
         <text class="banner-meta-text">张拆解卡命中</text>
         <view class="banner-another" bindtap="onAnother">
-          <t-icon name="refresh" size="28rpx" color="#fcd34d" />
+          <t-icon name="refresh" size="26rpx" color="#fdb927" />
           <text>再来一张</text>
         </view>
       </view>
@@ -79,7 +79,7 @@
             data-title="已复制{{activeMoodLabel}}"
             bindtap="copyReplyField"
           >
-            <t-icon name="file-copy" size="28rpx" color="#170826" />
+            <t-icon name="file-copy" size="26rpx" color="#ffffff" />
             <text>复制 {{activeMoodLabel}}</text>
           </view>
         </view>
@@ -103,10 +103,10 @@
       </view>
 
       <!-- 折叠区：3 段长内容 + logic + facts -->
-      <view class="expand-toggle" data-index="{{idx}}" bindtap="toggleExpand">
+      <view class="expand-toggle {{item.expanded ? 'expand-toggle-open' : ''}}" data-index="{{idx}}" bindtap="toggleExpand">
         <text wx:if="{{!item.expanded}}">展开 长拆 / 封口 / 口播 + 逻辑</text>
         <text wx:else>收起</text>
-        <text class="expand-arrow">{{item.expanded ? "▲" : "▼"}}</text>
+        <text class="expand-arrow">⌄</text>
       </view>
 
       <view class="expand-panel" wx:if="{{item.expanded}}">
@@ -172,6 +172,14 @@
       </view>
 
       <view class="card-foot-hint">长按按钮可生成分享图</view>
+
+      <!-- 升级：跳「问 AI」多轮聊天页，把 claim 作为 seed 带过去 -->
+      <view
+        class="card-foot-hint"
+        data-claim="{{item.card.claim}}"
+        bindtap="onAskAiTap"
+        style="color:#7c3aed; margin-top: 8rpx;"
+      >想追问？跟 AI 继续聊 ›</view>
     </view>
   </view>
 
@@ -185,7 +193,7 @@
   <!-- 底部：复制全部 / 回首页 -->
   <view class="bottom-bar" wx:if="{{results.length > 1}}">
     <view class="bottom-btn bottom-btn-primary" bindtap="copyAll">
-      <t-icon name="file-copy" size="28rpx" color="#170826" />
+      <t-icon name="file-copy" size="26rpx" color="#ffffff" />
       <text>复制全部 {{hitCount}} 张</text>
     </view>
   </view>

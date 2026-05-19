@@ -123,6 +123,16 @@ Page({
     })
   },
 
+  // 跳「问 AI」多轮聊天页。如果输入框已有内容，作为 seed 带过去（预填，不自动发）。
+  onChatTap() {
+    tapFeedback()
+    const q = (this.data.query || "").trim()
+    const url = q
+      ? "/pages/chat/chat?seed=" + encodeURIComponent(q)
+      : "/pages/chat/chat"
+    wx.navigateTo({ url: url })
+  },
+
   // ============ 本页内交互 ============
   onMoodTap(event) {
     const mood = event.currentTarget.dataset.mood

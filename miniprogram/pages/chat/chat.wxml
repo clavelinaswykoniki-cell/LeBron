@@ -1,0 +1,118 @@
+<view class="page">
+
+  <!-- 顶栏：标题 + 清空 -->
+  <view class="topbar">
+    <view class="topbar-title">
+      <text class="topbar-dot"></text>
+      <text class="topbar-name">问 AI · 只聊篮球</text>
+    </view>
+    <view
+      class="topbar-clear {{messages.length <= 1 || isLoading ? 'topbar-clear-disabled' : ''}}"
+      bindtap="onClear"
+    >清空</view>
+  </view>
+
+  <!-- 消息流 -->
+  <scroll-view
+    class="msg-scroll"
+    scroll-y
+    scroll-with-animation
+    scroll-into-view="{{scrollIntoView}}"
+    enhanced
+    show-scrollbar="{{false}}"
+  >
+    <view class="msg-list">
+      <block wx:for="{{messages}}" wx:key="id" wx:for-item="msg">
+
+        <!-- 本地系统提示（开场白 / 错误提示） -->
+        <view
+          wx:if="{{msg.role === 'system_tip'}}"
+          id="{{msg.id}}"
+          class="msg-row msg-row-tip"
+        >
+          <view class="bubble bubble-tip">{{msg.content}}</view>
+        </view>
+
+        <!-- 用户消息（右） -->
+        <view
+          wx:elif="{{msg.role === 'user'}}"
+          id="{{msg.id}}"
+          class="msg-row msg-row-user"
+        >
+          <view
+            class="bubble bubble-user"
+            data-id="{{msg.id}}"
+            bindlongpress="onMsgLongPress"
+          >{{msg.content}}</view>
+        </view>
+
+        <!-- AI 消息（左） -->
+        <view
+          wx:elif="{{msg.role === 'assistant'}}"
+          id="{{msg.id}}"
+          class="msg-row msg-row-ai"
+        >
+          <view class="ai-avatar">AI</view>
+          <view
+            class="bubble bubble-ai"
+            data-id="{{msg.id}}"
+            bindlongpress="onMsgLongPress"
+          >{{msg.content}}</view>
+        </view>
+
+      </block>
+
+      <!-- AI 思考中（打字气泡） -->
+      <view wx:if="{{isLoading}}" class="msg-row msg-row-ai">
+        <view class="ai-avatar">AI</view>
+        <view class="bubble bubble-ai bubble-typing">
+          <text class="dot"></text>
+          <text class="dot"></text>
+          <text class="dot"></text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 推荐提问（仅在只有开场白时显示） -->
+    <view wx:if="{{messages.length <= 1 && !isLoading}}" class="suggestions">
+      <view class="suggestions-title">不知道问啥？</view>
+      <view
+        wx:for="{{suggestions}}"
+        wx:key="*this"
+        wx:for-item="s"
+        class="suggest-chip"
+        data-text="{{s}}"
+        bindtap="onSuggestionTap"
+      >{{s}}</view>
+    </view>
+
+    <view class="msg-bottom-pad"></view>
+  </scroll-view>
+
+  <!-- 输入区 -->
+  <view class="composer">
+    <view class="composer-shell">
+      <textarea
+        class="composer-input"
+        placeholder="{{placeholder}}"
+        placeholder-class="composer-placeholder"
+        value="{{input}}"
+        bindinput="onInput"
+        maxlength="500"
+        auto-height
+        confirm-type="send"
+        adjust-position="{{true}}"
+        focus="{{inputFocus}}"
+        cursor-color="#7c3aed"
+      />
+    </view>
+    <view
+      class="composer-send {{(!input || isLoading) ? 'composer-send-disabled' : ''}}"
+      bindtap="onSend"
+    >
+      <text wx:if="{{isLoading}}">…</text>
+      <text wx:else>发送</text>
+    </view>
+  </view>
+
+</view>

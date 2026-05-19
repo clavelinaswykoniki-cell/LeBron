@@ -2,12 +2,38 @@ const corePositions = require("../data/core_positions")
 const factualSources = require("../data/factual_sources")
 const rebuttalTemplates = require("../data/rebuttal_templates")
 
+/**
+ * factual_sources 的 (topic + claim + usage) 拼一次小写串，避免 pickRelatedFacts
+ * 每次都重新拼接 + toLowerCase。
+ * factual_sources 是 module-level 常量，预计算即可。
+ */
+const _FACT_TEXTS_LOWER = factualSources.map(function (f) {
+  return ((f.topic || "") + " " + (f.claim || "") + " " + (f.usage || "")).toLowerCase()
+})
+
 function pickRelatedFacts(matchedCard) {
-  const tags = new Set((matchedCard.tags || []).map((tag) => String(tag).toLowerCase()))
-  return factualSources.filter((fact) => {
-    const text = `${fact.topic} ${fact.claim} ${fact.usage}`.toLowerCase()
-    return Array.from(tags).some((tag) => text.includes(tag))
-  }).slice(0, 3)
+  const tags = matchedCard && matchedCard.tags
+  if (!Array.isArray(tags) || tags.length === 0) return []
+
+  // 把 tag 也提前 lower 一次，避免在 some() 里重复 toLowerCase
+  const lowerTags = []
+  for (let i = 0; i < tags.length; i++) {
+    const t = tags[i]
+    if (t) lowerTags.push(String(t).toLowerCase())
+  }
+  if (lowerTags.length === 0) return []
+
+  const matched = []
+  for (let i = 0; i < factualSources.length && matched.length < 3; i++) {
+    const text = _FACT_TEXTS_LOWER[i]
+    for (let j = 0; j < lowerTags.length; j++) {
+      if (text.indexOf(lowerTags[j]) !== -1) {
+        matched.push(factualSources[i])
+        break
+      }
+    }
+  }
+  return matched
 }
 
 function buildPrompt(userQuery, matchedCard) {

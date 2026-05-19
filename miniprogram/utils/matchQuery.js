@@ -4,6 +4,39 @@ const { normalizeQuery } = require("./normalizeQuery")
 
 const { aliases, cards } = arsenal
 
+/* ------------------------------------------------------------------ *
+ * 索引：module 加载时一次性建好，匹配时全部 O(1) 查表。
+ *
+ * 早期版本里：每次 matchQuery 都要
+ *   - aliases.filter() 中对每个 alias 重新 normalizeQuery     → O(n)
+ *   - 然后对每个命中 alias 再 categories.find / cards.find   → O(n·m)
+ *
+ * 现在：
+ *   - _ALIASES_NORMALIZED[i] 预先归一好（normalizeQuery 自带 LRU，仍然便宜）
+ *   - _CARDS_BY_ID / _CATEGORIES_BY_ID 是 Map，find 改成 get
+ * ------------------------------------------------------------------ */
+
+const _CARDS_BY_ID = new Map()
+for (let i = 0; i < cards.length; i++) {
+  const c = cards[i]
+  if (c && c.id != null) _CARDS_BY_ID.set(c.id, c)
+}
+
+const _CATEGORIES_BY_ID = new Map()
+for (let i = 0; i < categories.length; i++) {
+  const cat = categories[i]
+  if (cat && cat.id != null) _CATEGORIES_BY_ID.set(cat.id, cat)
+}
+
+// 把每个 alias 的归一字符串预先算好，避免每次匹配重算
+const _ALIASES_NORMALIZED = aliases.map(function (a) {
+  return normalizeQuery(a.alias)
+})
+
+/* ------------------------------------------------------------------ *
+ * fallback 卡片
+ * ------------------------------------------------------------------ */
+
 function fallbackCard(input) {
   return {
     id: "general",
@@ -38,32 +71,60 @@ function categoryFallback(category, input) {
   }
 }
 
-function uniqueByCardId(items) {
-  const seen = {}
-  return items.filter((item) => {
-    const id = item.card.id
-    if (seen[id]) return false
-    seen[id] = true
-    return true
-  })
+/* ------------------------------------------------------------------ *
+ * 内部辅助
+ * ------------------------------------------------------------------ */
+
+function _isFallbackId(id) {
+  // id 为 number 时 String() 是必须的；为 string 时直接 endsWith 也行
+  // 但统一走 String 比较稳
+  return typeof id === "string"
+    ? id.endsWith("_fallback")
+    : String(id).endsWith("_fallback")
 }
 
-function removeNoisyFallbacks(items) {
-  const hasExactCard = items.some((item) => !String(item.card.id).endsWith("_fallback"))
-  if (hasExactCard) {
-    return items.filter((item) => !String(item.card.id).endsWith("_fallback"))
-  }
-  const categoriesWithExactCard = {}
-  items.forEach((item) => {
-    if (!String(item.card.id).endsWith("_fallback")) {
-      categoriesWithExactCard[item.categoryId || item.category] = true
+/**
+ * 同时做去重 + 去噪：
+ *   - 去重：按 card.id 唯一
+ *   - 去噪：如果某个 category 已有真实卡命中，就把同 category 下的 *_fallback 卡过滤掉；
+ *           如果一条真实卡都没有，则保留所有 fallback。
+ *
+ * 早期版本里这两件事是两次 filter，要扫 items 三遍；这里合并为一次扫描。
+ */
+function _dedupAndDenoise(items) {
+  const seenIds = new Set()
+  const categoriesWithRealCard = new Set()
+  let anyRealCard = false
+
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i]
+    if (!_isFallbackId(it.card.id)) {
+      anyRealCard = true
+      categoriesWithRealCard.add(it.categoryId || it.category)
     }
-  })
-  return items.filter((item) => {
-    if (!String(item.card.id).endsWith("_fallback")) return true
-    return !categoriesWithExactCard[item.categoryId || item.category]
-  })
+  }
+
+  const out = []
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i]
+    const id = it.card.id
+    if (seenIds.has(id)) continue
+    seenIds.add(id)
+
+    if (_isFallbackId(id)) {
+      // 如果有真实卡，整体丢 fallback；
+      // 如果没有真实卡但同 category 已有真实卡（罕见），也丢
+      if (anyRealCard) continue
+      if (categoriesWithRealCard.has(it.categoryId || it.category)) continue
+    }
+    out.push(it)
+  }
+  return out
 }
+
+/* ------------------------------------------------------------------ *
+ * 主入口
+ * ------------------------------------------------------------------ */
 
 function matchQuery(input) {
   const q = normalizeQuery(input)
@@ -71,34 +132,46 @@ function matchQuery(input) {
     return [{ alias: "通用", category: "通用反驳", priority: 1, card: fallbackCard(input) }]
   }
 
-  const matchedAliases = aliases
-    .filter((item) => q.includes(normalizeQuery(item.alias)))
-    .sort((a, b) => b.priority - a.priority)
-
-  const results = matchedAliases
-    .map((alias) => {
-      const category = categories.find((item) => item.id === alias.categoryId)
-      const card = alias.targetId
-        ? cards.find((item) => item.id === alias.targetId)
-        : null
-      return {
-        alias: alias.alias,
-        category: category ? category.name : (card ? card.category : alias.categoryId),
-        categoryId: alias.categoryId,
-        priority: alias.priority,
-        card: card || (category ? categoryFallback(category, input) : fallbackCard(input))
-      }
-    })
-    .filter((item) => item.card)
-
-  if (results.length > 0) {
-    return removeNoisyFallbacks(uniqueByCardId(results)).slice(0, 5)
+  // 一次扫描：用预归一表筛选命中 alias，附带 priority
+  const hits = []
+  for (let i = 0; i < aliases.length; i++) {
+    const normAlias = _ALIASES_NORMALIZED[i]
+    if (normAlias && q.includes(normAlias)) {
+      hits.push(aliases[i])
+    }
+  }
+  if (hits.length === 0) {
+    return [{ alias: "通用", category: "通用反驳", priority: 1, card: fallbackCard(input) }]
   }
 
-  return [{ alias: "通用", category: "通用反驳", priority: 1, card: fallbackCard(input) }]
+  // 按 priority 降序
+  hits.sort(function (a, b) { return b.priority - a.priority })
+
+  // 装配 result item（Map.get 全部 O(1)）
+  const results = []
+  for (let i = 0; i < hits.length; i++) {
+    const alias = hits[i]
+    const category = alias.categoryId ? _CATEGORIES_BY_ID.get(alias.categoryId) : null
+    const card = alias.targetId ? _CARDS_BY_ID.get(alias.targetId) : null
+    const finalCard = card || (category ? categoryFallback(category, input) : fallbackCard(input))
+    if (!finalCard) continue
+    results.push({
+      alias: alias.alias,
+      category: category ? category.name : (card ? card.category : alias.categoryId),
+      categoryId: alias.categoryId,
+      priority: alias.priority,
+      card: finalCard
+    })
+  }
+
+  if (results.length === 0) {
+    return [{ alias: "通用", category: "通用反驳", priority: 1, card: fallbackCard(input) }]
+  }
+  return _dedupAndDenoise(results).slice(0, 5)
 }
 
 function randomCard() {
+  if (!cards.length) return null
   const index = Math.floor(Math.random() * cards.length)
   return cards[index]
 }

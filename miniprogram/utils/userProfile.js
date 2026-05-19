@@ -13,38 +13,40 @@
 const OPENID_KEY = "lbr_openid"
 const PROFILE_KEY = "lbr_user_profile"
 
-function _storage() {
+/** 返回 wx 对象，要求 get + set 都可用；否则返回 null */
+function _wxStorage() {
   if (typeof wx === "undefined") return null
-  if (typeof wx.getStorageSync !== "function" || typeof wx.setStorageSync !== "function") return null
+  if (typeof wx.getStorageSync !== "function") return null
+  if (typeof wx.setStorageSync !== "function") return null
   return wx
 }
 
 function _genLocalOpenId() {
-  const ts = Date.now()
-  const rand = Math.random().toString(36).slice(2, 10)
-  return "local_" + ts + "_" + rand
+  return "local_" + Date.now() + "_" + Math.random().toString(36).slice(2, 10)
 }
 
 function getOrCreateOpenId() {
-  const s = _storage()
+  const s = _wxStorage()
   if (!s) return _genLocalOpenId() // 非小程序环境，返回临时
   try {
-    let id = s.getStorageSync(OPENID_KEY)
-    if (typeof id === "string" && id) return id
-    id = _genLocalOpenId()
-    s.setStorageSync(OPENID_KEY, id)
-    return id
+    const existing = s.getStorageSync(OPENID_KEY)
+    if (typeof existing === "string" && existing) return existing
+    const fresh = _genLocalOpenId()
+    s.setStorageSync(OPENID_KEY, fresh)
+    return fresh
   } catch (e) {
     return _genLocalOpenId()
   }
 }
 
 function getProfile() {
-  const s = _storage()
-  if (!s) return { openid: _genLocalOpenId(), nickname: "", avatar_url: "" }
+  const s = _wxStorage()
+  if (!s) {
+    return { openid: _genLocalOpenId(), nickname: "", avatar_url: "" }
+  }
+  const openid = getOrCreateOpenId()
   try {
     const raw = s.getStorageSync(PROFILE_KEY)
-    const openid = getOrCreateOpenId()
     if (!raw || typeof raw !== "object") {
       return { openid: openid, nickname: "", avatar_url: "" }
     }
@@ -54,18 +56,17 @@ function getProfile() {
       avatar_url: typeof raw.avatar_url === "string" ? raw.avatar_url : ""
     }
   } catch (e) {
-    return { openid: getOrCreateOpenId(), nickname: "", avatar_url: "" }
+    return { openid: openid, nickname: "", avatar_url: "" }
   }
 }
 
 function setProfile(profile) {
-  const s = _storage()
+  const s = _wxStorage()
   if (!s) return
   if (!profile || typeof profile !== "object") return
   try {
-    const openid = getOrCreateOpenId()
     const next = {
-      openid: openid,
+      openid: getOrCreateOpenId(),
       nickname: typeof profile.nickname === "string" ? profile.nickname : "",
       avatar_url: typeof profile.avatar_url === "string" ? profile.avatar_url : ""
     }

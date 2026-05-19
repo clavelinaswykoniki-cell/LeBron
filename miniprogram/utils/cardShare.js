@@ -18,6 +18,8 @@ const COLOR_GOLD = "#fbbf24"
 const COLOR_LIGHT_PURPLE = "#e9d5ff"
 const COLOR_WHITE = "#fef3c7"
 
+const MAX_WRAP_LINES = 5 // 单段最多换行数，超出补"…"
+
 /**
  * 在指定 canvas 上绘制卡片图，并通过 wx.canvasToTempFilePath 导出。
  */
@@ -33,7 +35,8 @@ function generateShareImage(card, options) {
       return
     }
     const canvasId = options.canvasId || "shareCanvas"
-    const ctx = wx.createCanvasContext(canvasId, options.pageInstance || null)
+    const pageInstance = options.pageInstance || null
+    const ctx = wx.createCanvasContext(canvasId, pageInstance)
 
     // 背景渐变
     const grad = ctx.createLinearGradient(0, 0, 0, SHARE_CANVAS_HEIGHT)
@@ -66,31 +69,16 @@ function generateShareImage(card, options) {
     _wrapText(ctx, card.claim, 80, 280, SHARE_CANVAS_WIDTH - 160, 40)
 
     // 先回这句（金色高亮）
-    ctx.setFillStyle(COLOR_GOLD)
-    ctx.setFontSize(22)
-    ctx.fillText("先回这句：", 80, 500)
-    ctx.setFillStyle(COLOR_WHITE)
-    ctx.setFontSize(32)
-    _wrapText(ctx, card.short_reply || "", 80, 545, SHARE_CANVAS_WIDTH - 160, 44)
+    _drawSection(ctx, "先回这句：", card.short_reply || "", 80, 500, 545, 32, 44)
 
     // 逻辑漏洞
     if (card.logic_flaw) {
-      ctx.setFillStyle(COLOR_GOLD)
-      ctx.setFontSize(22)
-      ctx.fillText("逻辑漏洞：", 80, 800)
-      ctx.setFillStyle("#ffffff")
-      ctx.setFontSize(24)
-      _wrapText(ctx, card.logic_flaw, 80, 840, SHARE_CANVAS_WIDTH - 160, 36)
+      _drawSection(ctx, "逻辑漏洞：", card.logic_flaw, 80, 800, 840, 24, 36)
     }
 
     // 同标准对比
     if (card.comparison) {
-      ctx.setFillStyle(COLOR_GOLD)
-      ctx.setFontSize(22)
-      ctx.fillText("同标准对比：", 80, 1020)
-      ctx.setFillStyle("#ffffff")
-      ctx.setFontSize(24)
-      _wrapText(ctx, card.comparison, 80, 1060, SHARE_CANVAS_WIDTH - 160, 36)
+      _drawSection(ctx, "同标准对比：", card.comparison, 80, 1020, 1060, 24, 36)
     }
 
     // 底部水印 - jersey 23
@@ -110,9 +98,32 @@ function generateShareImage(card, options) {
         canvasId: canvasId,
         success: function (res) { resolve(res.tempFilePath) },
         fail: function (err) { reject(err) }
-      }, options.pageInstance || null)
+      }, pageInstance)
     })
   })
+}
+
+/**
+ * 内部 helper：画一组"金色小标题 + 白色正文（自动换行）"
+ *
+ * @param {string} label    金色 22px 标题文字
+ * @param {string} body     正文
+ * @param {number} x        统一左对齐 x
+ * @param {number} labelY   标题基线 y
+ * @param {number} bodyY    正文基线 y
+ * @param {number} bodyFont 正文字号
+ * @param {number} lineH    正文行高
+ */
+function _drawSection(ctx, label, body, x, labelY, bodyY, bodyFont, lineH) {
+  ctx.setFillStyle(COLOR_GOLD)
+  ctx.setFontSize(22)
+  ctx.setTextAlign("left")
+  ctx.fillText(label, x, labelY)
+  if (!body) return
+  // short_reply 用 COLOR_WHITE 暖色，其他段用纯白
+  ctx.setFillStyle(label === "先回这句：" ? COLOR_WHITE : "#ffffff")
+  ctx.setFontSize(bodyFont)
+  _wrapText(ctx, body, x, bodyY, SHARE_CANVAS_WIDTH - 160, lineH)
 }
 
 /** 圆角矩形 helper */
@@ -130,20 +141,27 @@ function _roundRect(ctx, x, y, w, h, r) {
   ctx.closePath()
 }
 
-/** 文本换行 helper */
+/**
+ * 文本换行 helper：超出 MAX_WRAP_LINES 行截断为 "…"。
+ *
+ * 注意：早期实现里 maxLine 写死成 5 而 baseline 检查用 lineHeight * 5，
+ * 这两个值要一致。这里抽成常量 MAX_WRAP_LINES。
+ */
 function _wrapText(ctx, text, x, y, maxWidth, lineHeight) {
   if (!text) return
-  const chars = text.split("")
+  const chars = String(text).split("")
   let line = ""
   let yy = y
+  let drawnLines = 0
   for (let i = 0; i < chars.length; i++) {
     const test = line + chars[i]
     const metrics = ctx.measureText ? ctx.measureText(test) : { width: test.length * 18 }
     if (metrics.width > maxWidth && line.length > 0) {
       ctx.fillText(line, x, yy)
+      drawnLines += 1
       line = chars[i]
       yy += lineHeight
-      if (yy > y + lineHeight * 5) {
+      if (drawnLines >= MAX_WRAP_LINES) {
         ctx.fillText(line + "…", x, yy)
         return
       }

@@ -319,6 +319,16 @@ Page({
     wx.showToast({ title: "已增强", icon: "success" })
   },
 
+  // 跳到「问 AI」多轮聊天页，把对方原话 claim 作为 seed 带过去
+  onAskAiTap(event) {
+    tapFeedback()
+    const claim = (event.currentTarget.dataset.claim || this.data.query || "").trim()
+    const url = claim
+      ? "/pages/chat/chat?seed=" + encodeURIComponent(claim)
+      : "/pages/chat/chat"
+    wx.navigateTo({ url: url })
+  },
+
   onShareCardLongPress(event) {
     const index = Number(event.currentTarget.dataset.index)
     if (Number.isNaN(index)) return

@@ -34,7 +34,7 @@ function getTodayStr() {
 }
 
 function getYesterdayStr() {
-  var d = new Date()
+  const d = new Date()
   d.setDate(d.getDate() - 1)
   return formatYMD(d)
 }
@@ -46,42 +46,39 @@ function getYesterdayStr() {
  * 输入 "2026-05-15" -> 稳定 hash
  */
 function hashString(str) {
-  var h = 5381
-  for (var i = 0; i < str.length; i++) {
+  let h = 5381
+  for (let i = 0; i < str.length; i++) {
     h = ((h << 5) + h + str.charCodeAt(i)) | 0
   }
-  // 转为非负
   return h < 0 ? -h : h
 }
 
 /* ----------------------------- 存储封装 ----------------------------- */
 
+/**
+ * wx.setStorageSync 接受对象时会原样存对象，读出来还是对象；
+ * 历史版本里有过一个 JSON.parse 分支，但小程序原生 storage 不会把对象自动 stringify，
+ * 所以那条分支在 v2.5+ 是死代码，移除掉。
+ */
 function safeGet(key) {
   try {
-    if (typeof wx !== "undefined" && wx && typeof wx.getStorageSync === "function") {
-      var raw = wx.getStorageSync(key)
-      if (!raw) return null
-      if (typeof raw === "string") {
-        try { return JSON.parse(raw) } catch (e) { return null }
-      }
-      return raw
-    }
+    if (typeof wx === "undefined" || !wx || typeof wx.getStorageSync !== "function") return null
+    const raw = wx.getStorageSync(key)
+    if (!raw) return null
+    return (typeof raw === "object") ? raw : null
   } catch (e) {
     return null
   }
-  return null
 }
 
 function safeSet(key, value) {
   try {
-    if (typeof wx !== "undefined" && wx && typeof wx.setStorageSync === "function") {
-      wx.setStorageSync(key, value)
-      return true
-    }
+    if (typeof wx === "undefined" || !wx || typeof wx.setStorageSync !== "function") return false
+    wx.setStorageSync(key, value)
+    return true
   } catch (e) {
     return false
   }
-  return false
 }
 
 /* ----------------------------- 主 API ----------------------------- */
@@ -91,9 +88,9 @@ function safeSet(key, value) {
  * @returns {object|null} 完整 card 对象，arsenal 为空时返回 null
  */
 function getTodayCard() {
-  var cards = (arsenal && arsenal.cards) ? arsenal.cards : []
-  if (!cards || cards.length === 0) return null
-  var idx = hashString(getTodayStr()) % cards.length
+  const cards = (arsenal && arsenal.cards) ? arsenal.cards : []
+  if (!cards.length) return null
+  const idx = hashString(getTodayStr()) % cards.length
   return cards[idx]
 }
 
@@ -105,8 +102,8 @@ function getTodayCard() {
  * @returns {{ streak: number, totalDays: number, isNewDay: boolean, lastDate: string }}
  */
 function recordCheckin() {
-  var today = getTodayStr()
-  var prev = safeGet(STORAGE_KEY) || { lastDate: "", streak: 0, totalDays: 0 }
+  const today = getTodayStr()
+  const prev = safeGet(STORAGE_KEY) || { lastDate: "", streak: 0, totalDays: 0 }
 
   if (prev.lastDate === today) {
     return {
@@ -117,31 +114,25 @@ function recordCheckin() {
     }
   }
 
-  var nextStreak
-  if (prev.lastDate === getYesterdayStr()) {
-    nextStreak = (prev.streak || 0) + 1
-  } else {
-    nextStreak = 1
-  }
-  var nextTotal = (prev.totalDays || 0) + 1
+  const nextStreak = (prev.lastDate === getYesterdayStr())
+    ? (prev.streak || 0) + 1
+    : 1
+  const nextTotal = (prev.totalDays || 0) + 1
 
-  var next = {
-    lastDate: today,
-    streak: nextStreak,
-    totalDays: nextTotal
-  }
+  const next = { lastDate: today, streak: nextStreak, totalDays: nextTotal }
   safeSet(STORAGE_KEY, next)
 
   // fire-and-forget 同步到后端，失败不影响本地体验
+  // 用 try/catch 包住整段，确保 userProfile / api 任一环节失败都不会抛
   try {
     if (userProfile && typeof userProfile.getProfile === "function") {
-      var profile = userProfile.getProfile()
-      var card = getTodayCard()
+      const profile = userProfile.getProfile()
+      const card = getTodayCard()
       api.post("/api/daily/checkin", {
         openid: profile.openid,
         card_id: card && card.id ? String(card.id) : undefined
       }).catch(function (err) {
-        console.warn("[daily] checkin 后端同步失败（本地已记）:", err.message)
+        console.warn("[daily] checkin 后端同步失败（本地已记）:", err && err.message)
       })
     }
   } catch (e) {
@@ -158,10 +149,9 @@ function recordCheckin() {
 
 /**
  * 只读取签到统计，不修改
- * @returns {{ streak: number, totalDays: number, lastDate: string, todaySigned: boolean }}
  */
 function getCheckinStats() {
-  var prev = safeGet(STORAGE_KEY) || { lastDate: "", streak: 0, totalDays: 0 }
+  const prev = safeGet(STORAGE_KEY) || { lastDate: "", streak: 0, totalDays: 0 }
   return {
     streak: prev.streak || 0,
     totalDays: prev.totalDays || 0,

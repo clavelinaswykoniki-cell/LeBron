@@ -24,6 +24,12 @@ const COLORS = {
   black: "#0f172a"
 }
 
+const OVERLAY_HEIGHT_RATIO = 0.35
+const MAX_REPLY_LINES = 4
+
+/**
+ * 把文字按 maxWidth 自动换行；保留显式 "\n" 分段。
+ */
 function _wrapText(ctx, text, maxWidth) {
   const lines = []
   let line = ""
@@ -48,6 +54,22 @@ function _wrapText(ctx, text, maxWidth) {
   return lines
 }
 
+/** 根据 textPos 计算 overlay 顶部 y 坐标 */
+function _computeOverlayY(textPos) {
+  if (textPos === "top") return 0
+  if (textPos === "center") return H * 0.32
+  return H - H * OVERLAY_HEIGHT_RATIO // bottom
+}
+
+/** 画 overlay 黑底 + 金边 */
+function _drawOverlay(ctx, overlayY, overlayHeight) {
+  ctx.setFillStyle("rgba(0, 0, 0, 0.55)")
+  ctx.fillRect(0, overlayY, W, overlayHeight)
+  ctx.setFillStyle("rgba(251, 191, 36, 0.7)")
+  ctx.fillRect(0, overlayY, W, 3)
+  ctx.fillRect(0, overlayY + overlayHeight - 3, W, 3)
+}
+
 /**
  * 主入口
  */
@@ -69,11 +91,10 @@ function generateMemeImage(card, options) {
     function _finalDraw(bgImagePath) {
       const ctx = wx.createCanvasContext(canvasId, pageInstance)
 
+      // 背景
       if (bgImagePath) {
-        // 模板图铺满
         ctx.drawImage(bgImagePath, 0, 0, W, H)
       } else {
-        // 退化：紫金渐变
         const grad = ctx.createLinearGradient(0, 0, 0, H)
         grad.addColorStop(0, "#1a0a2e")
         grad.addColorStop(1, "#2a1145")
@@ -81,24 +102,12 @@ function generateMemeImage(card, options) {
         ctx.fillRect(0, 0, W, H)
       }
 
-      // 文字定位
+      // overlay 几何 + 颜色
       const textPos = (template && template.textPosition) || "bottom"
       const textColor = COLORS[(template && template.textColor) || "white"] || COLORS.white
-      const overlayHeight = H * 0.35
-
-      let overlayY
-      if (textPos === "top") overlayY = 0
-      else if (textPos === "center") overlayY = H * 0.32
-      else overlayY = H - overlayHeight // bottom
-
-      // 半透明黑底加可读性
-      ctx.setFillStyle("rgba(0, 0, 0, 0.55)")
-      ctx.fillRect(0, overlayY, W, overlayHeight)
-
-      // 紫金描边带子（顶/底各一条细线）
-      ctx.setFillStyle("rgba(251, 191, 36, 0.7)")
-      ctx.fillRect(0, overlayY, W, 3)
-      ctx.fillRect(0, overlayY + overlayHeight - 3, W, 3)
+      const overlayHeight = H * OVERLAY_HEIGHT_RATIO
+      const overlayY = _computeOverlayY(textPos)
+      _drawOverlay(ctx, overlayY, overlayHeight)
 
       // 主反驳文字（short_reply 加粗大字）
       const reply = String(card.short_reply || "").trim()
@@ -110,19 +119,18 @@ function generateMemeImage(card, options) {
       const padding = 50
       const maxWidth = W - padding * 2
       const lines = _wrapText(ctx, reply, maxWidth)
-      const maxLines = 4 // 防止文字太多溢出
-      const drawnLines = lines.slice(0, maxLines)
-      if (lines.length > maxLines) {
-        drawnLines[drawnLines.length - 1] =
-          drawnLines[drawnLines.length - 1].slice(0, -1) + "…"
+      const drawnLines = lines.slice(0, MAX_REPLY_LINES)
+      if (lines.length > MAX_REPLY_LINES && drawnLines.length > 0) {
+        const last = drawnLines[drawnLines.length - 1]
+        drawnLines[drawnLines.length - 1] = last.slice(0, -1) + "…"
       }
 
       const lineHeight = 64
       const totalH = drawnLines.length * lineHeight
       const startY = overlayY + (overlayHeight - totalH) / 2 + 40
-      drawnLines.forEach(function (ln, i) {
-        ctx.fillText(ln, W / 2, startY + i * lineHeight)
-      })
+      for (let i = 0; i < drawnLines.length; i++) {
+        ctx.fillText(drawnLines[i], W / 2, startY + i * lineHeight)
+      }
 
       // claim 副标题（小字，下方）
       if (card.claim) {
@@ -152,21 +160,20 @@ function generateMemeImage(card, options) {
         wx.canvasToTempFilePath({
           canvasId: canvasId,
           success: function (res) { resolve(res.tempFilePath) },
-          fail: function (err) { reject(new Error((err && err.errMsg) || "canvasToTempFilePath fail")) }
+          fail: function (err) {
+            reject(new Error((err && err.errMsg) || "canvasToTempFilePath fail"))
+          }
         }, pageInstance)
       })
     }
 
-    // 模板加载
+    // 模板加载（找不到 → 退化到渐变）
     if (template && template.file) {
       const imgSrc = "/assets/meme-templates/" + template.file
       wx.getImageInfo({
         src: imgSrc,
-        success: function (info) {
-          _finalDraw(info.path)
-        },
+        success: function (info) { _finalDraw(info.path) },
         fail: function () {
-          // 模板文件找不到 → 退化到渐变
           console.warn("[meme] 模板加载失败，退化到渐变: " + imgSrc)
           _finalDraw(null)
         }
