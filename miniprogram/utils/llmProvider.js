@@ -1,3 +1,19 @@
+/**
+ * llmProvider.js — LLM 增强反驳接入
+ *
+ * 当前架构（v2.5+）：
+ *   小程序 → 自家后端 /api/llm/enhance → DeepSeek API
+ *   key 只在 server/.env，不出现在前端
+ *
+ * 失败时返回 null，由 caller（结果页）回退到本地反驳卡
+ * （遵守 CLAUDE.md 硬约束：CloudBase failure must always fall back to local cards）
+ *
+ * Legacy: cloudfunctions/generateReply/ 是旧的 CloudBase 调用路径，保留代码但前端不再走它。
+ *         未来若要做多路 fallback，可以再加 callCloudFunction 作为第二跳。
+ */
+
+const api = require("./api")
+
 function generateWithLocalCard(card) {
   return {
     short_reply: card.short_reply,
@@ -21,37 +37,30 @@ function normalizeEnhancedReply(reply) {
   return normalized
 }
 
-function callCloudFunction(data) {
-  return new Promise((resolve, reject) => {
-    wx.cloud.callFunction({
-      name: "generateReply",
-      data,
-      success: resolve,
-      fail: reject
-    })
-  })
-}
-
 async function generateEnhancedReply(params) {
-  if (typeof wx === "undefined" || !wx.cloud || typeof wx.cloud.callFunction !== "function") {
+  params = params || {}
+  if (typeof params.userQuery !== "string" || !params.userQuery.trim()) {
     return null
   }
-
   try {
-    const response = await callCloudFunction({
+    const result = await api.post("/api/llm/enhance", {
       userQuery: params.userQuery || "",
       matchedCard: params.matchedCard || {},
       corePosition: params.corePosition || ""
-    })
-    const result = response && response.result ? response.result : response
-    if (!result || result.ok !== true) return null
+    }, { timeout: 30000 })
+    if (!result || result.ok !== true) {
+      console.warn("[llm] enhance 返回非 ok:", result && result.error)
+      return null
+    }
     return normalizeEnhancedReply(result.reply)
-  } catch (error) {
+  } catch (e) {
+    console.warn("[llm] enhance 失败:", e.message)
     return null
   }
 }
 
 module.exports = {
   generateWithLocalCard,
-  generateEnhancedReply
+  generateEnhancedReply,
+  normalizeEnhancedReply
 }

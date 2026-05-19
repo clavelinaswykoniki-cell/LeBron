@@ -1,0 +1,84 @@
+<view class="meme-page">
+
+  <view class="page-header">
+    <view class="title">梗图工厂</view>
+    <view class="subtitle">选反驳 + 选模板 → 一键合成 → 保存或分享</view>
+  </view>
+
+  <!-- Step 1: 选反驳卡 -->
+  <view class="section">
+    <view class="section-head">
+      <text>① 选反驳（{{candidates.length}} 张候选）</text>
+      <text class="reshuffle-btn" bindtap="reshuffle">🔄 换一批</text>
+    </view>
+    <scroll-view class="hscroll" scroll-x="{{true}}">
+      <view class="hscroll-row">
+        <view
+          wx:for="{{candidates}}"
+          wx:key="id"
+          data-index="{{index}}"
+          bindtap="pickCard"
+          class="candidate-card {{selectedCardIndex === index ? 'selected' : ''}}"
+        >
+          <view class="candidate-claim">{{item.claim}}</view>
+          <view class="candidate-reply">{{item.short_reply}}</view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- Step 2: 选模板 -->
+  <view class="section">
+    <view class="section-head">
+      <text>② 选梗图模板（{{templates.length}}）</text>
+      <text class="hint" wx:if="{{templates.length === 1}}">扔 PNG 到 assets/meme-templates/ 加更多</text>
+    </view>
+    <scroll-view class="hscroll" scroll-x="{{true}}">
+      <view class="hscroll-row">
+        <view
+          wx:for="{{templates}}"
+          wx:key="id"
+          data-index="{{index}}"
+          bindtap="pickTemplate"
+          class="template-card {{selectedTemplateIndex === index ? 'selected' : ''}}"
+        >
+          <view wx:if="{{item.isGradient}}" class="template-gradient">
+            <text class="template-gradient-label">紫</text>
+          </view>
+          <image
+            wx:else
+            class="template-preview"
+            src="/assets/meme-templates/{{item.file}}"
+            mode="aspectFill"
+          />
+          <view class="template-name">{{item.name}}</view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- Step 3: 生成 / 保存 -->
+  <view class="section" wx:if="{{selectedCard}}">
+    <view class="action-row">
+      <button class="primary-btn" bindtap="generate" loading="{{generating}}" disabled="{{generating}}">
+        {{generating ? '生成中…' : '③ 生成梗图'}}
+      </button>
+      <button class="ghost-btn" bindtap="save" disabled="{{!generatedTempPath}}">
+        {{generatedTempPath ? '💾 保存到相册' : '保存到相册'}}
+      </button>
+    </view>
+
+    <view class="generated-preview" wx:if="{{generatedTempPath}}">
+      <image class="generated-image" src="{{generatedTempPath}}" mode="widthFix" show-menu-by-longpress="{{true}}"/>
+      <view class="tip">长按图片可分享 / 右上角菜单可发朋友圈</view>
+    </view>
+  </view>
+
+  <view class="empty-tip" wx:if="{{!selectedCard}}">
+    👆 先在上面挑一张反驳卡
+  </view>
+
+  <!-- 隐藏 canvas 用于合成 -->
+  <canvas canvas-id="memeCanvas" class="hidden-canvas"></canvas>
+
+</view>

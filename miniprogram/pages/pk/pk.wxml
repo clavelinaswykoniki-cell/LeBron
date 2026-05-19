@@ -43,9 +43,20 @@
 
     <view class="result-actions">
       <button class="action-btn primary" bindtap="restart">再战一局</button>
+      <button class="action-btn" bindtap="goMeme">做张梗图</button>
       <button class="action-btn" bindtap="shareResult">分享战绩</button>
       <button class="action-btn" bindtap="goLeaderboard">看排行</button>
     </view>
   </view>
+
+  <!-- 段位升级 / 完美一战 庆祝弹窗 -->
+  <rank-up-modal
+    visible="{{rankUp.visible}}"
+    title="{{rankUp.title}}"
+    subtitle="{{rankUp.subtitle}}"
+    emoji="{{rankUp.emoji}}"
+    bind:close="onRankUpClose"
+    bind:share="onRankUpShare"
+  />
 
 </view>

@@ -11,7 +11,12 @@
     <view class="my-rank-btn" bindtap="goPK">去 PK 升段</view>
   </view>
 
-  <view class="board-title">段位排行榜</view>
+  <view class="board-title">
+    段位排行榜
+    <text class="board-loading" wx:if="{{loading}}"> · 刷新中…</text>
+  </view>
+
+  <view class="board-error-tip" wx:if="{{errorTip}}">{{errorTip}}</view>
 
   <view class="board-list">
     <view
@@ -26,6 +31,7 @@
     </view>
   </view>
 
-  <view class="footer-tip">数据每天刷新，PK 答题可加分。</view>
+  <view class="footer-tip" wx:if="{{fromServer}}">数据来自服务器，PK 答题可加分。</view>
+  <view class="footer-tip" wx:else>本地兜底数据，PK 答题可加分。</view>
 
 </view>

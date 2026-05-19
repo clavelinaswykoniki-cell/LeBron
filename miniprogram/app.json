@@ -11,7 +11,8 @@
     "pages/onboarding/onboarding",
     "pages/leaderboard/leaderboard",
     "pages/pk/pk",
-    "pages/daily/daily"
+    "pages/daily/daily",
+    "pages/meme/meme"
   ],
   "window": {
     "navigationBarTitleText": "詹黑逻辑拆解器",

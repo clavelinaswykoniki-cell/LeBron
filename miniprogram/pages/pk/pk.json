@@ -2,5 +2,7 @@
   "navigationBarTitleText": "PK 答题",
   "navigationBarBackgroundColor": "#1a0a2e",
   "navigationBarTextStyle": "white",
-  "usingComponents": {}
+  "usingComponents": {
+    "rank-up-modal": "/components/rank-up-modal/rank-up-modal"
+  }
 }

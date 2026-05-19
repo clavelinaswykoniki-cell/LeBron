@@ -78,6 +78,20 @@
   letter-spacing: 2rpx;
 }
 
+.board-loading {
+  color: #b8a8d4;
+  font-size: 24rpx;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.board-error-tip {
+  color: #f87171;
+  font-size: 22rpx;
+  margin: 0 4rpx 16rpx 4rpx;
+  letter-spacing: 0.5rpx;
+}
+
 /* ----- 排行榜列表 ----- */
 .board-list {
   background: rgba(45, 27, 78, 0.4);

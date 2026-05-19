@@ -476,5 +476,29 @@ Page({
       wx.showToast({ title: "分享图生成失败", icon: "none" })
       this.setData({ shareCanvasVisible: false })
     })
+  },
+
+  // 微信原生「分享给朋友」
+  onShareAppMessage(event) {
+    // 如果是从结果卡按钮触发，带上对应反驳卡的 claim
+    let claim = ""
+    if (event && event.target && event.target.dataset && typeof event.target.dataset.index !== "undefined") {
+      const idx = Number(event.target.dataset.index)
+      if (this.data.results && this.data.results[idx] && this.data.results[idx].card) {
+        claim = this.data.results[idx].card.claim || ""
+      }
+    }
+    return {
+      title: claim ? "1 句话怼回「" + claim + "」" : "詹黑逻辑拆解器 · 175 反驳卡",
+      path: "/pages/index/index"
+    }
+  },
+
+  // 微信原生「分享到朋友圈」
+  onShareTimeline() {
+    return {
+      title: "詹黑逻辑拆解器 · 175 反驳卡 / 730 别名",
+      query: ""
+    }
   }
 })

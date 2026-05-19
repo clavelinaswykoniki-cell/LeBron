@@ -13,6 +13,9 @@
  */
 
 const arsenal = require("../data/arsenal")
+const api = require("./api")
+let userProfile = null
+try { userProfile = require("./userProfile") } catch (e) { userProfile = null }
 
 const STORAGE_KEY = "lbr_daily_checkin"
 
@@ -128,6 +131,22 @@ function recordCheckin() {
     totalDays: nextTotal
   }
   safeSet(STORAGE_KEY, next)
+
+  // fire-and-forget 同步到后端，失败不影响本地体验
+  try {
+    if (userProfile && typeof userProfile.getProfile === "function") {
+      var profile = userProfile.getProfile()
+      var card = getTodayCard()
+      api.post("/api/daily/checkin", {
+        openid: profile.openid,
+        card_id: card && card.id ? String(card.id) : undefined
+      }).catch(function (err) {
+        console.warn("[daily] checkin 后端同步失败（本地已记）:", err.message)
+      })
+    }
+  } catch (e) {
+    // silent
+  }
 
   return {
     streak: nextStreak,

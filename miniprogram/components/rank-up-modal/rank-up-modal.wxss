@@ -1,0 +1,168 @@
+.rank-up-mask {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.rank-up-mask.shown {
+  opacity: 1;
+}
+
+.rank-up-panel {
+  width: 600rpx;
+  max-width: 90vw;
+  padding: 60rpx 40rpx 40rpx;
+  background: linear-gradient(180deg, #1a0a2e 0%, #2d1245 50%, #3a1860 100%);
+  border-radius: 28rpx;
+  border: 3rpx solid rgba(255, 215, 0, 0.6);
+  box-shadow:
+    0 0 80rpx rgba(255, 215, 0, 0.4),
+    0 0 0 1rpx rgba(255, 215, 0, 0.3) inset;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transform: scale(0.7) translateY(40rpx);
+  opacity: 0;
+  transition:
+    transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.5s ease;
+}
+
+.rank-up-mask.shown .rank-up-panel {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+/* 紫金光柱：从下方上升 */
+.light-beam {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 280rpx;
+  height: 120%;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255, 215, 0, 0.18) 40%,
+    rgba(255, 215, 0, 0.55) 100%
+  );
+  transform: translateX(-50%) translateY(80%);
+  filter: blur(50rpx);
+  pointer-events: none;
+  opacity: 0;
+  transition: transform 1.2s ease-out, opacity 0.8s ease;
+}
+
+.rank-up-mask.shown .light-beam {
+  transform: translateX(-50%) translateY(20%);
+  opacity: 0.9;
+  animation: beam-pulse 2.4s ease-in-out infinite alternate;
+}
+
+@keyframes beam-pulse {
+  0%   { opacity: 0.6; }
+  100% { opacity: 0.95; }
+}
+
+/* 23 号水印 */
+.jersey-watermark {
+  position: absolute;
+  top: 20rpx;
+  right: 30rpx;
+  font-size: 70rpx;
+  font-weight: 900;
+  color: rgba(255, 215, 0, 0.12);
+  letter-spacing: -4rpx;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* 顶部强调标题 */
+.title-text {
+  color: #ffd700;
+  font-size: 38rpx;
+  font-weight: 700;
+  letter-spacing: 4rpx;
+  margin-bottom: 36rpx;
+  text-shadow: 0 0 24rpx rgba(255, 215, 0, 0.7);
+  position: relative;
+  z-index: 2;
+}
+
+/* 中央段位卡 */
+.tier-card {
+  margin: 20rpx 20rpx 40rpx;
+  padding: 44rpx 24rpx;
+  background: rgba(255, 215, 0, 0.08);
+  border: 2rpx solid rgba(255, 215, 0, 0.4);
+  border-radius: 20rpx;
+  position: relative;
+  z-index: 2;
+}
+
+.tier-emoji {
+  font-size: 110rpx;
+  line-height: 1;
+  margin-bottom: 18rpx;
+  filter: drop-shadow(0 0 30rpx rgba(255, 215, 0, 0.6));
+}
+
+.tier-name {
+  font-size: 46rpx;
+  font-weight: 900;
+  line-height: 1.2;
+  background: linear-gradient(135deg, #ffd700 0%, #ffae00 60%, #ff8c00 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 2rpx;
+}
+
+/* 操作区 */
+.actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 16rpx;
+  position: relative;
+  z-index: 2;
+}
+
+.action-btn {
+  flex: 1;
+  height: 84rpx;
+  line-height: 84rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  border-radius: 42rpx;
+  padding: 0;
+  margin: 0;
+}
+
+.action-btn::after {
+  border: none;
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #ffd700 0%, #ffae00 100%);
+  color: #1a0a2e;
+  box-shadow: 0 8rpx 20rpx rgba(255, 174, 0, 0.4);
+}
+
+.action-btn.primary:active {
+  transform: scale(0.96);
+}
+
+.action-btn.ghost {
+  background: rgba(255, 255, 255, 0.06);
+  color: #b8a3e0;
+  border: 2rpx solid rgba(184, 163, 224, 0.4);
+}

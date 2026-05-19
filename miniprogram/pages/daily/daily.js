@@ -120,5 +120,22 @@ Page({
         }
       })
     } catch (e) {}
+  },
+
+  onShareAppMessage: function () {
+    const card = this.data.card
+    const claim = card && card.claim ? card.claim : "今日反驳"
+    return {
+      title: "今日宿命卡：" + claim,
+      path: "/pages/daily/daily"
+    }
+  },
+
+  onShareTimeline: function () {
+    const card = this.data.card
+    return {
+      title: card && card.claim ? "今日反驳：" + card.claim : "每日反驳 · 詹黑逻辑拆解器",
+      query: ""
+    }
   }
 })

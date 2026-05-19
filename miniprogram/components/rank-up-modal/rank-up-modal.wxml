@@ -1,0 +1,22 @@
+<view
+  class="rank-up-mask {{shown ? 'shown' : ''}}"
+  wx:if="{{visible}}"
+  bindtap="onMaskTap"
+>
+  <view class="rank-up-panel" catchtap="onPanelTap">
+    <view class="light-beam"></view>
+    <view class="jersey-watermark">23</view>
+
+    <view class="title-text">{{title}}</view>
+
+    <view class="tier-card">
+      <view class="tier-emoji">{{emoji}}</view>
+      <view class="tier-name">{{subtitle}}</view>
+    </view>
+
+    <view class="actions">
+      <button class="action-btn primary" bindtap="onShare" open-type="share">分享给朋友</button>
+      <button class="action-btn ghost" bindtap="onClose">继续</button>
+    </view>
+  </view>
+</view>

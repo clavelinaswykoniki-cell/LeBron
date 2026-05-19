@@ -3,3 +3,13 @@ import_corpus/*
 !import_corpus/.gitkeep
 node_modules/
 miniprogram_npm/
+
+# 后端环境变量（含 RDS 凭证）：永远不可 commit
+.env
+.env.local
+.env.*.local
+server/.env
+
+# Claude Code 本地配置（每个开发者自己的环境，不进仓库）
+.claude/
+server/.claude/

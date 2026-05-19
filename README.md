@@ -5,9 +5,37 @@
 [![Tests](https://img.shields.io/badge/tests-8%2F8%20passing-brightgreen)](scripts/)
 [![Cards](https://img.shields.io/badge/cards-175-fbbf24)](miniprogram/data/)
 
-> 微信小程序练手项目。把评论区常见的 LeBron 詹黑话术拆解成结构化反驳卡，配套段位 / 测试 H5 / 彩蛋 / 收藏 / 分享卡片等娱乐组件。
+> 微信小程序全栈作品。把评论区常见的 LeBron 詹黑话术拆解成结构化反驳卡，配套段位对战 / 排行榜 / 每日签到 / AI 增强反驳 / 分享卡片等娱乐组件。
 
-**v2.1** · 175 张反驳卡 · 559 条别名 · 46 类争议分类 · 紫金湖人主题
+**v2.6** · 215 张反驳卡 · 730 条别名 · 46 类争议分类 · 紫金湖人主题
+**全栈架构**：小程序前端 + Node/Express 后端 + PostgreSQL on 阿里云 RDS + DeepSeek V4 AI 增强
+
+---
+
+## 🎯 架构（v2.6 全栈版本）
+
+```mermaid
+graph LR
+    A[微信小程序客户端] -->|HTTPS| B[Node/Express API<br/>on 阿里云 ECS]
+    B -->|pg pool| C[(PostgreSQL<br/>阿里云 RDS)]
+    B -->|DeepSeek V4 Flash| D[AI 反驳增强]
+    A -.失败降级.-> E[(本地 wx.storage<br/>+ mock 数据)]
+
+    style A fill:#fbbf24,stroke:#1a0a2e,color:#1a0a2e
+    style B fill:#a78bfa,stroke:#1a0a2e,color:#fff
+    style C fill:#34d399,stroke:#1a0a2e,color:#fff
+    style D fill:#f472b6,stroke:#1a0a2e,color:#fff
+    style E fill:#94a3b8,stroke:#1a0a2e,color:#fff
+```
+
+**API 端点**：
+- `GET /api/leaderboard` — PK 段位排行
+- `POST /api/pk/submit` — 对战结果 + 段位分变化（事务）
+- `POST /api/daily/checkin` — 每日签到 + streak 累计
+- `POST /api/llm/enhance` — DeepSeek 代理（key 永不出现在前端）
+- `GET /health` / `GET /api/llm/health` — 健康检查
+
+**双路径策略**：每个网络调用都有本地兜底，离线/网络差时用户体验是"网络慢"而非"崩了"。
 
 ---
 
@@ -43,13 +71,15 @@ npm install
 
 | 层 | 内容 |
 |---|---|
-| 框架 | 微信小程序原生（无 Taro / uni-app） |
+| 客户端 | 微信小程序原生（无 Taro / uni-app） |
 | UI | [TDesign Mini-Program](https://tdesign.tencent.com/miniprogram) v1.14 |
-| 状态 | Page 内 `data` + `wx.setStorageSync`（段位 / 勋章持久化） |
-| 后端 | 可选 CloudBase 云函数 `generateReply`（DeepSeek v4-flash），不可用时**本地兜底** |
-| 测试 | Node.js 脚本（syntax check / match / corpus / fallback / progression unit） |
-
-零新依赖，零构建步骤。
+| 客户端状态 | Page 内 `data` + `wx.setStorageSync`（段位 / 勋章 / 历史） |
+| 后端 | Node.js 18 + Express + `pg` driver |
+| 数据库 | PostgreSQL 18（阿里云 RDS） |
+| AI 增强 | DeepSeek V4 Flash（通过自家后端代理，key 不出现在前端） |
+| 部署 | 阿里云 ECS（Node + Nginx + PM2 + Let's Encrypt HTTPS） |
+| 测试 | Node.js 脚本（syntax / match / corpus / fallback / progression / safety / feedback / matchquery） + curl smoke 脚本 |
+| CI | GitHub Actions（每次 push/PR 自动跑测试矩阵） |
 
 ---
 
@@ -57,12 +87,15 @@ npm install
 
 | 指标 | 数量 |
 |---|---|
-| 反驳卡 | **175 张**（base 100 + docx 50 + v2.1 新增 5 + 球星对比 20） |
-| 别名 / 短梗 | **559 条** |
+| 反驳卡 | **215 张**（base 100 + docx 50 + v2.1 新增 5 + 球星对比 20 + v2.4-2.5 新增 40） |
+| 别名 / 短梗 | **730 条** |
 | 争议分类 | **46 类** |
+| 段位 | 5 档（青铜詹蜜 / 白银 / 黄金 / 钻石 / 王者詹皇） |
 | 黑点素材库 | **10 张深度拆解**（`docs/raw-perspectives/`） + 扩展 JSON（events/data/causes/background/analysis）|
-| 已实现页面 | **9 个**（index / about / quiz / easter / privacy / history / favorites / onboarding / result）|
-| 自动化测试 | **8 个**（含 GitHub Actions CI）|
+| 已实现页面 | **12 个**（index / result / about / easter / quiz / privacy / history / favorites / onboarding / leaderboard / pk / daily）|
+| 后端表 | 4 张（users / leaderboard / match_records / checkins） |
+| 后端 API | 5 个（leaderboard / pk/submit / daily/checkin / llm/enhance / health） |
+| 自动化测试 | **8 个前端 + curl smoke 9 步**（含 GitHub Actions CI）|
 
 ---
 
@@ -102,18 +135,27 @@ npm install
 
 ## 跑测试
 
+**前端**：
 ```bash
 npm run check:syntax    # 静态检查 + UI 契约
 npm run test:match      # 50 个高频黑点 → 命中卡匹配验证
 npm run test:corpus     # 语料完整性 + 别名数 + review_needed 校验
-npm run test:ai-fallback # CloudBase 失败时本地兜底验证
-npm run test:progression # progression.js 单元测试（7 个用例）
-npm run test:safety     # safety.js 单元测试（6 个用例）
-npm run test:feedback   # feedback.js 单元测试（6 个用例）
-npm run test:matchquery # matchQuery.js 单元测试（8 个用例）
+npm run test:ai-fallback # AI enhance 三态：missing / failure / success
+npm run test:progression # progression.js 单元测试
+npm run test:safety     # safety.js 单元测试
+npm run test:feedback   # feedback.js 单元测试
+npm run test:matchquery # matchQuery.js 单元测试
 ```
 
-**8/8 通过**即可。GitHub Actions CI 会在每次 push / PR 自动跑。
+**后端**：
+```bash
+cd server
+npm run test:connect    # RDS 连接 + 表存在性验证
+./test-api.sh           # 9 步 curl 回归（不烧 DeepSeek token）
+./test-api.sh --include-llm  # 跑真实 DeepSeek 联调（消耗 token）
+```
+
+GitHub Actions CI 在每次 push / PR 自动跑前端测试。
 
 ---
 

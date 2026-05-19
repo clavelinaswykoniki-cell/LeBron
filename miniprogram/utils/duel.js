@@ -1,21 +1,24 @@
 /**
  * duel.js — 段位对抗核心（PK 答题 + 排行榜 + 战绩记录）
  *
- * v2.4 全部用本地 mock 数据 + localStorage。后端备案完成后，把每个
- * 暴露函数（getLeaderboard / getMyRank / startMatch / submitMatch）的
- * 内部替换为 wx.request 调 ECS API 即可。调用方契约不变。
+ * v2.5: getLeaderboard 保留为同步版（本地 mock + 我），用于无网兜底；
+ *       新增 fetchLeaderboard (async) 优先调 GET /api/leaderboard，失败降级到本地。
+ *       submitMatch 写完本地 history 后 fire-and-forget POST /api/pk/submit，
+ *       后端失败不影响用户感知。
  *
  * 数据契约（前端 / 后端通用）：
- *   getLeaderboard()      → Array<{rank, name, avatar, viewCount, copyCount, score}>
- *   getMyRank()           → {rank, total, score, nickname}
+ *   getLeaderboard()      → Array<{rank, name, avatar, viewCount, copyCount, score, isMe}>
+ *   fetchLeaderboard()    → Promise<{fromServer:boolean, players: Array<...>}>
+ *   getMyRank()           → {rank, total, score, nickname, tier}
  *   startMatch()          → {matchId, questions: [{cardId, prompt, options, correctIndex}]}
- *   submitMatch(id, ans)  → {score, rankChange, history}
+ *   submitMatch(id, ans, qs) → {score, rankChange, history}
  *   getDuelHistory()      → Array<{matchId, score, date, correct, total}>
  */
 
 const arsenal = require("../data/arsenal")
+const api = require("./api")
+const userProfile = require("./userProfile")
 
-// 顶部一次性 require progression，避免重复 require + 错误吞噬
 let progression = null
 try { progression = require("./progression") } catch (e) {}
 
@@ -30,7 +33,6 @@ const RANK_TIERS = [
   { id: "king",    name: "王者詹皇",   threshold: 1800 }
 ]
 
-// mock 玩家名 + 头像 emoji（100 个）
 const MOCK_NAMES = [
   "湖人骨灰粉","23号信徒","King James","紫金王朝","Strive4Greatness","南海岸老人",
   "热火不死鸟","骑士复仇者","Decision1","NotOneNotTwo","跨步追防者","历史第一人",
@@ -63,7 +65,6 @@ function _rankFor(score) {
 }
 
 function _seedRandom(seed) {
-  // 简单 LCG 伪随机，让 mock 玩家每次刷新顺序不抖动
   let s = seed
   return () => {
     s = (s * 1103515245 + 12345) & 0x7fffffff
@@ -103,7 +104,6 @@ function _getOrCreateMockLeaderboard() {
 function _getMyScore() {
   if (!progression || typeof progression.getCurrentRank !== "function") return 0
   const snap = progression.getCurrentRank()
-  // 综合分：view × 10 + copy × 5 + 战绩历史最高 × 3
   const history = getDuelHistory()
   const validScores = history
     .map((h) => h && h.score)
@@ -113,23 +113,29 @@ function _getMyScore() {
 }
 
 function _getMyNickname() {
+  const profile = userProfile.getProfile()
+  if (profile.nickname) return profile.nickname
   if (typeof wx === "undefined" || !wx.getStorageSync) return "我"
   try {
-    const profile = wx.getStorageSync("lbr_user_profile") || {}
-    return profile.nickname || "我"
+    const old = wx.getStorageSync("lbr_user_profile") || {}
+    return old.nickname || "我"
   } catch (e) { return "我" }
 }
 
-function getLeaderboard() {
-  const players = _getOrCreateMockLeaderboard().slice()
-  const myScore = _getMyScore()
-  const myNickname = _getMyNickname()
+function _avatarForOpenid(openid) {
+  if (!openid) return MOCK_AVATARS[0]
+  let h = 0
+  for (let i = 0; i < openid.length; i++) h = (h * 31 + openid.charCodeAt(i)) & 0x7fffffff
+  return MOCK_AVATARS[h % MOCK_AVATARS.length]
+}
 
-  // 插入"我"
-  let myEntry = {
+function _buildMyEntry() {
+  const profile = userProfile.getProfile()
+  const myScore = _getMyScore()
+  const entry = {
     rank: 0,
-    name: myNickname,
-    avatar: "🎯",
+    name: profile.nickname || _getMyNickname(),
+    avatar: profile.avatar_url || "🎯",
     viewCount: 0,
     copyCount: 0,
     score: myScore,
@@ -138,14 +144,58 @@ function getLeaderboard() {
   if (progression && typeof progression.getCurrentRank === "function") {
     try {
       const snap = progression.getCurrentRank()
-      myEntry.viewCount = snap.viewCount || 0
-      myEntry.copyCount = snap.copyCount || 0
+      entry.viewCount = snap.viewCount || 0
+      entry.copyCount = snap.copyCount || 0
     } catch (e) {}
   }
+  return entry
+}
 
+/**
+ * 同步版本：本地 mock 100 玩家 + 我，按 score 排序。无网兜底。
+ */
+function getLeaderboard() {
+  const players = _getOrCreateMockLeaderboard().slice()
+  const myEntry = _buildMyEntry()
   const all = players.concat([myEntry]).sort((a, b) => b.score - a.score)
   all.forEach((p, i) => { p.rank = i + 1 })
   return all
+}
+
+/**
+ * 异步版本：优先 GET /api/leaderboard，失败降级到 getLeaderboard()。
+ * 返回 { fromServer: boolean, players: Array }
+ */
+function fetchLeaderboard(opts) {
+  const limit = (opts && opts.limit) || 50
+  const myOpenid = userProfile.getOrCreateOpenId()
+
+  return api.requestWithFallback(
+    "GET", "/api/leaderboard", { limit: limit },
+    function () { return null }
+  ).then(function (resp) {
+    if (!resp || !Array.isArray(resp.data)) {
+      return { fromServer: false, players: getLeaderboard() }
+    }
+    const players = resp.data.map(function (row, i) {
+      return {
+        rank: row.rank || (i + 1),
+        name: row.nickname || "匿名玩家",
+        avatar: row.avatar_url || _avatarForOpenid(row.openid),
+        viewCount: 0,
+        copyCount: 0,
+        score: row.score,
+        tier: row.tier,
+        isMe: row.openid === myOpenid
+      }
+    })
+    if (!players.some(function (p) { return p.isMe })) {
+      players.push(_buildMyEntry())
+      players.sort(function (a, b) { return b.score - a.score })
+      players.forEach(function (p, i) { p.rank = i + 1 })
+    }
+    return { fromServer: true, players: players }
+  })
 }
 
 function getMyRank() {
@@ -177,7 +227,6 @@ function _pickRandomCards(n) {
 }
 
 function _generateDistractors(card, allCards) {
-  // 抽 3 张其他卡的 short_reply 作为干扰项。最多尝试 50 次避免死循环。
   const out = []
   const used = { [card.id]: true }
   let attempts = 0
@@ -189,7 +238,6 @@ function _generateDistractors(card, allCards) {
     used[c.id] = true
     out.push(c.short_reply)
   }
-  // 凑不够 3 个就用占位符（极端情况下 allCards 不足）
   while (out.length < 3) out.push("（暂无可选项）")
   return out
 }
@@ -200,7 +248,6 @@ function startMatch() {
   const questions = picks.map((card) => {
     const distractors = _generateDistractors(card, allCards)
     const options = distractors.concat([card.short_reply])
-    // shuffle
     for (let i = options.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1))
       ;[options[i], options[j]] = [options[j], options[i]]
@@ -222,15 +269,13 @@ function startMatch() {
 }
 
 function submitMatch(matchId, answers, questions) {
-  // answers: array of selected indices, questions: array from startMatch
   let correct = 0
   ;(answers || []).forEach((a, i) => {
     if (questions[i] && a === questions[i].correctIndex) correct += 1
   })
   const total = questions.length
-  const score = correct * 20 // 每题 20 分，满分 100
+  const score = correct * 20
 
-  // 段位变化：基于得分给出 +/- 段位分
   let rankChange = 0
   if (score >= 80) rankChange = +30
   else if (score >= 60) rankChange = +10
@@ -246,7 +291,6 @@ function submitMatch(matchId, answers, questions) {
     rankChange
   }
 
-  // 存历史
   if (typeof wx !== "undefined" && wx.setStorageSync) {
     try {
       const history = getDuelHistory()
@@ -254,6 +298,23 @@ function submitMatch(matchId, answers, questions) {
       const trimmed = history.slice(0, 50)
       wx.setStorageSync(HISTORY_KEY, trimmed)
     } catch (e) {}
+  }
+
+  // fire-and-forget 同步到后端；失败只 console.warn，不影响本地体验
+  try {
+    const profile = userProfile.getProfile()
+    api.post("/api/pk/submit", {
+      openid: profile.openid,
+      nickname: profile.nickname || undefined,
+      avatar_url: profile.avatar_url || undefined,
+      score: score,
+      total: total,
+      delta: rankChange
+    }).catch(function (err) {
+      console.warn("[duel] pk/submit 后端同步失败（本地数据已保存）:", err.message)
+    })
+  } catch (e) {
+    // silent — 后端同步不应影响 PK 主流程
   }
 
   return { score, correct, total, rankChange, record }
@@ -290,6 +351,7 @@ function getStats() {
 module.exports = {
   RANK_TIERS,
   getLeaderboard,
+  fetchLeaderboard,
   getMyRank,
   startMatch,
   submitMatch,
