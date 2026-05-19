@@ -78,6 +78,16 @@ function _toQueryString(data) {
  */
 function canUseCloudCall(opts) {
   if (opts && opts.forceHttp) return false
+
+  // 开发期 kill switch：在 wx storage 设 lbr_disable_cloud=true 可关掉云调用，强制走 wx.request fallback。
+  // 用法：在开发者工具 Console 跑 wx.setStorageSync('lbr_disable_cloud', true) → 重新编译
+  // 关联好云托管环境后跑 wx.setStorageSync('lbr_disable_cloud', false) 恢复。
+  try {
+    if (typeof wx !== "undefined" && typeof wx.getStorageSync === "function") {
+      if (wx.getStorageSync("lbr_disable_cloud") === true) return false
+    }
+  } catch (e) {}
+
   return typeof wx !== "undefined"
     && wx.cloud
     && typeof wx.cloud.callContainer === "function"
