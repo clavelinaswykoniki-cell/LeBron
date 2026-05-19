@@ -11,7 +11,13 @@
  *
  * 关停流程：SIGINT / SIGTERM 都走 shutdown()，先停接受新连接，
  *           然后 await db.close() 关池，10s 超时强制 exit(1)。
+ *
+ * 环境变量加载：本地 npm start 时通过 dotenv 读 server/.env；
+ * 云托管生产环境直接注入环境变量，dotenv 找不到 .env 文件不报错（silent）。
  */
+
+// 加载本地 .env（云托管 prod 没有这个文件，silent 忽略）
+try { require("dotenv").config() } catch (e) { /* dotenv 未装 or 无 .env，靠 process.env 兜底 */ }
 
 const express = require("express")
 const cors = require("cors")
