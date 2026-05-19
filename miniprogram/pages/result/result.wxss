@@ -1,16 +1,585 @@
-.placeholder {
-  padding: 32rpx;
+/* ============================================
+ * result.wxss — 拆解结果页
+ *
+ * 设计取舍：
+ *   1. 紫金克制：紫 (#552583) 只出现在 banner 渐变和强调描边
+ *      金 (#fbbf24 / #fcd34d / #fde68a) 用于 active 状态 + "先回这句" 高亮
+ *      正文统一冷灰 (#cbd5e1, #e5e7eb)，避免视觉嘈杂
+ *   2. 大留白：卡片间距 32rpx，卡片内 padding 28rpx，区块间 18-22rpx
+ *   3. 字号分级：
+ *      banner 标题 48rpx → claim 30rpx → hit-text 34rpx (最显眼)
+ *      → 正文 26-27rpx → 元数据 21-22rpx
+ *   4. 单卡聚焦：每张卡有完整 border + box-shadow，左侧 4rpx 紫金渐变带
+ * ============================================ */
+
+page {
+  background:
+    radial-gradient(120% 40% at 50% -10%, rgba(85, 37, 131, 0.55) 0%, rgba(15, 23, 42, 0) 60%),
+    linear-gradient(180deg, #160a31 0%, #0f172a 600rpx);
+
+  --td-brand-color: #fbbf24;
+  --td-brand-color-1: rgba(251, 191, 36, 0.08);
+  --td-brand-color-2: rgba(251, 191, 36, 0.16);
 }
 
-.title {
-  color: #f8fafc;
+.page {
+  padding: 32rpx 28rpx 80rpx;
+  box-sizing: border-box;
+}
+
+/* ============================================
+ * 顶部 query banner
+ * ============================================ */
+.query-banner {
+  position: relative;
+  display: flex;
+  padding: 32rpx 28rpx 28rpx;
+  background: linear-gradient(135deg, #2d1457 0%, #160a31 75%, #1f0a3d 100%);
+  border-radius: 22rpx;
+  border: 1rpx solid rgba(251, 191, 36, 0.22);
+  box-shadow: 0 18rpx 48rpx rgba(0, 0, 0, 0.36);
+  overflow: hidden;
+}
+
+/* 装饰背景：右下大数字 23 */
+.query-banner::after {
+  content: "23";
+  position: absolute;
+  right: -24rpx;
+  bottom: -100rpx;
+  font-size: 360rpx;
+  line-height: 1;
+  font-weight: 900;
+  color: rgba(251, 191, 36, 0.06);
+  letter-spacing: -10rpx;
+  pointer-events: none;
+}
+
+.banner-line {
+  flex: 0 0 6rpx;
+  margin-right: 22rpx;
+  border-radius: 6rpx;
+  background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 50%, #552583 100%);
+}
+
+.banner-body {
+  flex: 1;
+  min-width: 0;
+  z-index: 1;
+}
+
+.banner-eyebrow {
+  color: #fcd34d;
+  font-size: 22rpx;
+  font-weight: 800;
+  letter-spacing: 3rpx;
+}
+
+.banner-title {
+  margin-top: 10rpx;
+  color: #fef3c7;
+  font-size: 48rpx;
+  font-weight: 900;
+  line-height: 1.2;
+  word-break: break-all;
+  text-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.32);
+}
+
+.banner-meta {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-top: 18rpx;
+  color: #e9d5ff;
+  font-size: 24rpx;
+}
+
+.banner-meta-num {
+  color: #fbbf24;
+  font-size: 36rpx;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.banner-meta-text {
+  color: #e9d5ff;
+  font-size: 24rpx;
+}
+
+.banner-another {
+  display: inline-flex;
+  align-items: center;
+  gap: 6rpx;
+  margin-left: auto;
+  padding: 10rpx 18rpx;
+  border-radius: 999rpx;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1rpx solid rgba(251, 191, 36, 0.36);
+  color: #fcd34d;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+/* ============================================
+ * mood 切换条（页面级）
+ * ============================================ */
+.mood-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12rpx;
+  margin: 24rpx 0 8rpx;
+}
+
+.mood-pill {
+  height: 72rpx;
+  line-height: 72rpx;
+  text-align: center;
+  border-radius: 14rpx;
+  background: #1a2235;
+  border: 1rpx solid rgba(148, 163, 184, 0.22);
+  color: #cbd5e1;
+  font-size: 24rpx;
+  font-weight: 800;
+  transition: all 0.18s ease;
+}
+
+.mood-pill-active {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  border-color: #fbbf24;
+  color: #170826;
+  box-shadow: 0 0 18rpx rgba(251, 191, 36, 0.42);
+}
+
+/* ============================================
+ * 卡片
+ * ============================================ */
+.cards {
+  margin-top: 24rpx;
+}
+
+.card {
+  position: relative;
+  margin-bottom: 32rpx;
+  padding: 28rpx;
+  border-radius: 20rpx;
+  background: #111827;
+  border: 1rpx solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 18rpx 48rpx rgba(0, 0, 0, 0.28);
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 20rpx;
+  bottom: 20rpx;
+  width: 5rpx;
+  border-radius: 0 5rpx 5rpx 0;
+  background: linear-gradient(180deg, #fbbf24 0%, #552583 100%);
+}
+
+/* ----- 卡片顶部 meta ----- */
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14rpx;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  flex: 1;
+  min-width: 0;
+}
+
+.category-tag {
+  padding: 6rpx 16rpx;
+  border-radius: 999rpx;
+  background: rgba(85, 37, 131, 0.32);
+  border: 1rpx solid rgba(167, 139, 250, 0.38);
+  color: #e9d5ff;
+  font-size: 21rpx;
+  font-weight: 800;
+  letter-spacing: 1rpx;
+}
+
+.alias-tag {
+  color: #94a3b8;
+  font-size: 22rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 320rpx;
+}
+
+.fav-star {
+  flex: 0 0 56rpx;
+  width: 56rpx;
+  height: 56rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999rpx;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1rpx solid rgba(148, 163, 184, 0.28);
+  color: #94a3b8;
+  font-size: 36rpx;
+  line-height: 1;
+}
+
+.fav-star-on {
+  color: #fbbf24;
+  border-color: #fbbf24;
+  background: rgba(251, 191, 36, 0.16);
+  text-shadow: 0 0 8rpx rgba(251, 191, 36, 0.6);
+}
+
+/* ----- claim 框（对方原话） ----- */
+.claim-box {
+  margin-top: 22rpx;
+  padding: 22rpx;
+  border-radius: 14rpx;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1rpx solid rgba(148, 163, 184, 0.2);
+  border-left: 4rpx solid rgba(220, 38, 38, 0.55);
+}
+
+.claim-label {
+  color: #94a3b8;
+  font-size: 21rpx;
+  font-weight: 800;
+  letter-spacing: 2rpx;
+  margin-bottom: 8rpx;
+}
+
+.claim-text {
+  color: #e5e7eb;
+  font-size: 30rpx;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+/* ----- "先回这句" 高亮（核心区域） ----- */
+.hit-box {
+  margin-top: 22rpx;
+  padding: 26rpx;
+  border-radius: 16rpx;
+  background:
+    linear-gradient(135deg, rgba(85, 37, 131, 0.22) 0%, rgba(251, 191, 36, 0.06) 100%);
+  border: 1rpx solid rgba(251, 191, 36, 0.32);
+  box-shadow: inset 0 0 24rpx rgba(251, 191, 36, 0.08);
+}
+
+.hit-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  color: #fcd34d;
+  font-size: 22rpx;
+  font-weight: 900;
+  letter-spacing: 2rpx;
+}
+
+.hit-tag-dot {
+  display: inline-block;
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #fbbf24;
+  box-shadow: 0 0 8rpx #fbbf24;
+}
+
+.hit-text {
+  margin-top: 14rpx;
+  color: #fff7ed;
   font-size: 34rpx;
+  font-weight: 900;
+  line-height: 1.55;
+  letter-spacing: 0.5rpx;
+}
+
+.hit-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18rpx;
+}
+
+.hit-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 14rpx 24rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #170826;
+  font-size: 24rpx;
+  font-weight: 900;
+  box-shadow: 0 4rpx 14rpx rgba(251, 191, 36, 0.32);
+}
+
+/* ----- 4 mood 复制按钮组 ----- */
+.copy-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12rpx;
+  margin-top: 18rpx;
+}
+
+.copy-strip-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+  padding: 14rpx 6rpx;
+  border-radius: 12rpx;
+  background: #1a2235;
+  border: 1rpx solid rgba(148, 163, 184, 0.22);
+  color: #cbd5e1;
+}
+
+.copy-strip-btn-active {
+  background: rgba(251, 191, 36, 0.12);
+  border-color: rgba(251, 191, 36, 0.55);
+}
+
+.copy-strip-name {
+  font-size: 24rpx;
+  font-weight: 900;
+  color: #f8fafc;
+}
+
+.copy-strip-btn-active .copy-strip-name {
+  color: #fbbf24;
+}
+
+.copy-strip-hint {
+  font-size: 18rpx;
+  color: #94a3b8;
+  letter-spacing: 1rpx;
+}
+
+/* ----- 折叠开关 ----- */
+.expand-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+  margin-top: 20rpx;
+  padding: 16rpx;
+  border-radius: 12rpx;
+  background: rgba(251, 191, 36, 0.06);
+  border: 1rpx dashed rgba(251, 191, 36, 0.32);
+  color: #fcd34d;
+  font-size: 23rpx;
+  font-weight: 700;
+}
+
+.expand-arrow {
+  color: #fbbf24;
+  font-size: 22rpx;
+}
+
+/* ----- 折叠展开区 ----- */
+.expand-panel {
+  margin-top: 18rpx;
+  padding: 22rpx;
+  border-radius: 14rpx;
+  background: rgba(2, 6, 23, 0.55);
+  border: 1rpx solid rgba(148, 163, 184, 0.18);
+}
+
+.ext-section {
+  margin-bottom: 18rpx;
+}
+
+.ext-section:last-of-type {
+  margin-bottom: 0;
+}
+
+.ext-title {
+  color: #e9d5ff;
+  font-size: 22rpx;
+  font-weight: 900;
+  letter-spacing: 2rpx;
+  margin-bottom: 6rpx;
+}
+
+.ext-title.gold {
+  color: #fde68a;
+}
+
+.ext-text {
+  color: #cbd5e1;
+  font-size: 26rpx;
+  line-height: 1.65;
+}
+
+.ext-text-strong {
+  color: #fff7ed;
+  font-weight: 900;
+  font-size: 28rpx;
+}
+
+.ext-text.muted {
+  color: #94a3b8;
+  font-size: 24rpx;
+}
+
+/* ----- facts ----- */
+.facts-block {
+  margin-top: 18rpx;
+  padding: 16rpx 18rpx;
+  border-radius: 12rpx;
+  background: rgba(251, 191, 36, 0.06);
+  border: 1rpx solid rgba(251, 191, 36, 0.2);
+}
+
+.facts-title {
+  color: #fbbf24;
+  font-size: 22rpx;
+  font-weight: 900;
+  margin-bottom: 6rpx;
+  letter-spacing: 1rpx;
+}
+
+.fact-row {
+  color: #fde68a;
+  font-size: 23rpx;
+  line-height: 1.65;
+}
+
+/* ----- tags ----- */
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 18rpx;
+}
+
+.tag-chip {
+  padding: 6rpx 14rpx;
+  border-radius: 999rpx;
+  background: rgba(85, 37, 131, 0.18);
+  border: 1rpx solid rgba(167, 139, 250, 0.24);
+  color: #c4b5fd;
+  font-size: 21rpx;
+}
+
+/* ----- 卡片底部 actions ----- */
+.card-foot {
+  display: flex;
+  gap: 14rpx;
+  margin-top: 22rpx;
+}
+
+.foot-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 80rpx;
+  border-radius: 14rpx;
+  font-size: 25rpx;
   font-weight: 900;
 }
 
-.text {
-  margin-top: 18rpx;
+.foot-btn-gold {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #170826;
+  box-shadow: 0 6rpx 16rpx rgba(251, 191, 36, 0.3);
+}
+
+.foot-btn-ghost {
+  background: #1a2235;
+  border: 1rpx solid rgba(148, 163, 184, 0.28);
+  color: #e5e7eb;
+}
+
+.foot-btn-disabled {
+  opacity: 0.55;
+}
+
+.card-foot-hint {
+  margin-top: 12rpx;
+  text-align: center;
+  color: #64748b;
+  font-size: 20rpx;
+  letter-spacing: 1rpx;
+}
+
+/* ============================================
+ * 空状态
+ * ============================================ */
+.empty {
+  margin-top: 60rpx;
+  padding: 60rpx 32rpx;
+  text-align: center;
+  border-radius: 20rpx;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1rpx solid rgba(148, 163, 184, 0.2);
+}
+
+.empty-emoji {
+  font-size: 80rpx;
+}
+
+.empty-title {
+  margin-top: 14rpx;
+  color: #f8fafc;
+  font-size: 30rpx;
+  font-weight: 900;
+}
+
+.empty-sub {
+  margin-top: 10rpx;
   color: #94a3b8;
+  font-size: 24rpx;
+}
+
+/* ============================================
+ * 底部操作条
+ * ============================================ */
+.bottom-bar {
+  display: flex;
+  justify-content: center;
+  margin-top: 8rpx;
+  margin-bottom: 16rpx;
+}
+
+.bottom-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+  padding: 22rpx 32rpx;
+  border-radius: 14rpx;
   font-size: 26rpx;
-  line-height: 1.6;
+  font-weight: 900;
+}
+
+.bottom-btn-primary {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #170826;
+  box-shadow: 0 6rpx 18rpx rgba(251, 191, 36, 0.32);
+}
+
+.page-footer {
+  margin-top: 28rpx;
+  text-align: center;
+  color: #475569;
+  font-size: 20rpx;
+}
+
+/* ============================================
+ * 分享画布（隐藏在屏幕外）
+ * ============================================ */
+.share-canvas {
+  position: fixed;
+  top: -3000rpx;
+  left: -3000rpx;
+  pointer-events: none;
 }

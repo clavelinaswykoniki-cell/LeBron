@@ -1,3 +1,13 @@
 {
-  "navigationBarTitleText": "反驳详情"
+  "navigationBarTitleText": "拆解结果",
+  "navigationBarBackgroundColor": "#160a31",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#0f172a",
+  "usingComponents": {
+    "t-button": "tdesign-miniprogram/button/button",
+    "t-tag": "tdesign-miniprogram/tag/tag",
+    "t-icon": "tdesign-miniprogram/icon/icon",
+    "t-divider": "tdesign-miniprogram/divider/divider",
+    "t-input": "tdesign-miniprogram/input/input"
+  }
 }

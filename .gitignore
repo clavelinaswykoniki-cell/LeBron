@@ -13,3 +13,6 @@ server/.env
 # Claude Code 本地配置（每个开发者自己的环境，不进仓库）
 .claude/
 server/.claude/
+
+# 微信开发者工具个人偏好（每人本地独立）
+project.private.config.json

@@ -1,6 +1,205 @@
-<view class="safe-area">
-  <view class="card placeholder">
-    <view class="title">反驳详情页预留</view>
-    <view class="text">第一版集中在首页完成搜索、匹配、展示和复制。后续接 DeepSeek/豆包后再拆详情页。</view>
+<view class="page">
+
+  <!-- ========== 顶部 query banner ========== -->
+  <view class="query-banner">
+    <view class="banner-line"></view>
+    <view class="banner-body">
+      <view class="banner-eyebrow">
+        <text wx:if="{{isRandom}}">随机拆解</text>
+        <text wx:else>你说的那句</text>
+      </view>
+      <view class="banner-title">{{query}}</view>
+      <view class="banner-meta">
+        <text class="banner-meta-num">{{hitCount}}</text>
+        <text class="banner-meta-text">张拆解卡命中</text>
+        <view class="banner-another" bindtap="onAnother">
+          <t-icon name="refresh" size="28rpx" color="#fcd34d" />
+          <text>再来一张</text>
+        </view>
+      </view>
+    </view>
   </view>
+
+  <!-- ========== mood 切换条（页面级，控制所有卡的高亮字段） ========== -->
+  <view class="mood-row">
+    <view
+      wx:for="{{moodTabs}}"
+      wx:key="id"
+      class="mood-pill {{activeMood === item.id ? 'mood-pill-active' : ''}}"
+      data-mood="{{item.id}}"
+      bindtap="onMoodTap"
+    >{{item.name}}</view>
+  </view>
+
+  <!-- ========== 卡片列表 ========== -->
+  <view class="cards" wx:if="{{results.length > 0}}">
+    <view
+      class="card"
+      wx:for="{{results}}"
+      wx:key="resultKey"
+      wx:for-item="item"
+      wx:for-index="idx"
+    >
+      <!-- 顶部 meta -->
+      <view class="card-head">
+        <view class="card-meta">
+          <view class="category-tag">{{item.category}}</view>
+          <view class="alias-tag" wx:if="{{item.alias}}">命中「{{item.alias}}」</view>
+        </view>
+        <view
+          class="fav-star {{item.isFavorited ? 'fav-star-on' : ''}}"
+          data-index="{{idx}}"
+          bindtap="onToggleFavorite"
+        >★</view>
+      </view>
+
+      <!-- 对方话术（claim） -->
+      <view class="claim-box">
+        <view class="claim-label">对方原话</view>
+        <view class="claim-text">{{item.card.claim}}</view>
+      </view>
+
+      <!-- 先回这句（短刀/封口/长拆/口播 中当前激活的那个） -->
+      <view class="hit-box">
+        <view class="hit-tag">
+          <text class="hit-tag-dot"></text>
+          <text class="hit-tag-text">{{activeMoodLabel}} · 先回这句</text>
+        </view>
+
+        <view class="hit-text" wx:if="{{activeMood === 'short_reply'}}">{{item.card.short_reply}}</view>
+        <view class="hit-text" wx:elif="{{activeMood === 'one_liner'}}">{{item.card.one_liner}}</view>
+        <view class="hit-text" wx:elif="{{activeMood === 'long_reply'}}">{{item.card.long_reply}}</view>
+        <view class="hit-text" wx:elif="{{activeMood === 'video_script'}}">{{item.card.video_script}}</view>
+
+        <view class="hit-actions">
+          <view
+            class="hit-copy-btn"
+            data-index="{{idx}}"
+            data-field="{{activeMood}}"
+            data-title="已复制{{activeMoodLabel}}"
+            bindtap="copyReplyField"
+          >
+            <t-icon name="file-copy" size="28rpx" color="#170826" />
+            <text>复制 {{activeMoodLabel}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 4 mood 复制按钮（直接复制对应字段） -->
+      <view class="copy-strip">
+        <view
+          wx:for="{{moodTabs}}"
+          wx:key="id"
+          wx:for-item="tab"
+          class="copy-strip-btn {{activeMood === tab.id ? 'copy-strip-btn-active' : ''}}"
+          data-index="{{idx}}"
+          data-field="{{tab.field}}"
+          data-title="已复制{{tab.name}}"
+          bindtap="copyReplyField"
+        >
+          <text class="copy-strip-name">{{tab.name}}</text>
+          <text class="copy-strip-hint">复制</text>
+        </view>
+      </view>
+
+      <!-- 折叠区：3 段长内容 + logic + facts -->
+      <view class="expand-toggle" data-index="{{idx}}" bindtap="toggleExpand">
+        <text wx:if="{{!item.expanded}}">展开 长拆 / 封口 / 口播 + 逻辑</text>
+        <text wx:else>收起</text>
+        <text class="expand-arrow">{{item.expanded ? "▲" : "▼"}}</text>
+      </view>
+
+      <view class="expand-panel" wx:if="{{item.expanded}}">
+        <!-- 长拆 -->
+        <view class="ext-section">
+          <view class="ext-title">长线拆解</view>
+          <view class="ext-text">{{item.card.long_reply}}</view>
+        </view>
+        <!-- 封口 -->
+        <view class="ext-section">
+          <view class="ext-title">一句话封口</view>
+          <view class="ext-text ext-text-strong">{{item.card.one_liner}}</view>
+        </view>
+        <!-- 口播 -->
+        <view class="ext-section">
+          <view class="ext-title">视频口播版</view>
+          <view class="ext-text">{{item.card.video_script}}</view>
+        </view>
+
+        <!-- 逻辑拆解 -->
+        <view class="ext-section" wx:if="{{item.card.logic_flaw}}">
+          <view class="ext-title gold">逻辑漏洞</view>
+          <view class="ext-text">{{item.card.logic_flaw}}</view>
+        </view>
+        <view class="ext-section" wx:if="{{item.card.comparison}}">
+          <view class="ext-title gold">同标准对比</view>
+          <view class="ext-text">{{item.card.comparison}}</view>
+        </view>
+        <view class="ext-section" wx:if="{{item.card.valid_part}}">
+          <view class="ext-title gold">可承认的部分</view>
+          <view class="ext-text muted">{{item.card.valid_part}}</view>
+        </view>
+
+        <!-- facts -->
+        <view class="facts-block" wx:if="{{item.card.facts && item.card.facts.length}}">
+          <view class="facts-title">事实依据</view>
+          <view class="fact-row" wx:for="{{item.card.facts}}" wx:key="*this" wx:for-item="fact">· {{fact}}</view>
+        </view>
+      </view>
+
+      <!-- tags -->
+      <view class="tag-row" wx:if="{{item.card.tags && item.card.tags.length}}">
+        <view class="tag-chip" wx:for="{{item.card.tags}}" wx:key="*this" wx:for-item="tag">#{{tag}}</view>
+      </view>
+
+      <!-- 底部 actions：增强 / 整张 / 长按分享 -->
+      <view class="card-foot">
+        <view
+          class="foot-btn foot-btn-gold {{item.isEnhancing ? 'foot-btn-disabled' : ''}}"
+          data-index="{{idx}}"
+          bindtap="onEnhanceReply"
+          bindlongpress="onShareCardLongPress"
+        >
+          <text wx:if="{{item.isEnhancing}}">AI 思考中…</text>
+          <text wx:else>AI 增强反驳</text>
+        </view>
+        <view
+          class="foot-btn foot-btn-ghost"
+          data-index="{{idx}}"
+          bindtap="copyCard"
+          bindlongpress="onShareCardLongPress"
+        >复制整张</view>
+      </view>
+
+      <view class="card-foot-hint">长按按钮可生成分享图</view>
+    </view>
+  </view>
+
+  <!-- 空状态（理论上不会触发：matchQuery 至少返回 fallback；保留兜底） -->
+  <view class="empty" wx:else>
+    <view class="empty-emoji">🤔</view>
+    <view class="empty-title">没拆出来</view>
+    <view class="empty-sub">这句话有点偏，回首页换个角度试试</view>
+  </view>
+
+  <!-- 底部：复制全部 / 回首页 -->
+  <view class="bottom-bar" wx:if="{{results.length > 1}}">
+    <view class="bottom-btn bottom-btn-primary" bindtap="copyAll">
+      <t-icon name="file-copy" size="28rpx" color="#170826" />
+      <text>复制全部 {{hitCount}} 张</text>
+    </view>
+  </view>
+
+  <view class="page-footer">
+    <text>v2.6 · 拆解结果页</text>
+  </view>
+
+  <!-- 分享画布（屏幕外） -->
+  <canvas
+    wx:if="{{shareCanvasVisible}}"
+    canvas-id="shareCanvas"
+    class="share-canvas"
+    style="width: 750rpx; height: 1334rpx;"
+  ></canvas>
+
 </view>

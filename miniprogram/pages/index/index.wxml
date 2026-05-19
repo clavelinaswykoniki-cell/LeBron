@@ -1,334 +1,118 @@
-<view class="safe-area page">
-  <view class="court-hero gold-rim">
-    <view class="hero-copy">
-      <view class="league-pill">
-        <t-icon name="flashlight" size="28rpx" color="#f8c44f" />
-        <text>紫金弹药库</text>
-      </view>
-      <view class="hero-title">
-        <text class="hero-title-main">詹黑逻辑拆解器</text>
-      </view>
-      <view class="hero-subtitle">把评论区黑点拆成：短句反击、长逻辑、口播脚本和同标准回旋镖。</view>
-      <view class="hero-stats">
-        <view class="stat-card">
-          <view class="stat-num">{{arsenalStats.cards}}</view>
-          <view class="stat-label">反驳卡</view>
-        </view>
-        <view class="stat-card">
-          <view class="stat-num">{{arsenalStats.aliases}}</view>
-          <view class="stat-label">短梗命中</view>
-        </view>
-        <view class="stat-card">
-          <view class="stat-num">{{arsenalStats.categories}}</view>
-          <view class="stat-label">争议分类</view>
-        </view>
-      </view>
+<view class="page">
+
+  <!-- 顶栏：app 标识 + 段位徽章 -->
+  <view class="topbar">
+    <view class="brand">
+      <view class="brand-mark">23</view>
+      <text class="brand-name">逻辑拆解器</text>
     </view>
-    <view class="jersey-card lakers-glow" bindlongpress="onJerseyLongPress">
-      <view class="crown">KING</view>
-      <view class="jersey-num">23</view>
-      <view class="jersey-line">LOGIC OVER HATE</view>
-      <view class="jersey-hint">长按解锁</view>
+    <view
+      wx:if="{{rank}}"
+      class="rank-chip rank-{{rank.rank.id}}"
+      data-url="/pages/about/about"
+      bindtap="onMenuTap"
+    >
+      <text class="rank-chip-name">{{rank.rank.name}}</text>
+      <text class="rank-chip-arrow">›</text>
     </view>
   </view>
 
-  <view wx:if="{{rank}}" class="rank-strip" data-url="/pages/about/about" bindtap="onMenuTap">
-    <view class="rank-strip-left">
-      <text class="rank-strip-emoji">🏆</text>
-      <view>
-        <view class="rank-strip-title">我的段位：{{rank.rank.name}}</view>
-        <view class="rank-strip-sub">已读 {{rank.viewCount}} 张 · 已复制 {{rank.copyCount}} 次</view>
-      </view>
-    </view>
-    <view class="rank-strip-arrow">›</view>
-  </view>
-
-  <view class="mood-panel">
-    <view class="section-head">
-      <view>
-        <view class="section-kicker">先选作战模式</view>
-        <view class="section-title">想怎么回，就怎么打</view>
-      </view>
-      <t-tag theme="warning" variant="light" shape="round">战术模式</t-tag>
-    </view>
-    <view class="mood-grid">
-      <view
-        wx:for="{{moodTabs}}"
-        wx:key="id"
-        class="mood-card {{activeMood === item.id ? 'active' : ''}}"
-        data-mood="{{item.id}}"
-        bindtap="onMoodTap"
-      >
-        <t-icon name="{{item.icon}}" size="32rpx" color="{{activeMood === item.id ? '#170826' : '#f8c44f'}}" />
-        <text>{{item.name}}</text>
-      </view>
-    </view>
-  </view>
-
-  <view class="battle-panel gold-rim">
-    <view class="section-head">
-      <view>
-        <view class="section-kicker">热梗开打</view>
-        <view class="section-title">点一下，直接出弹药</view>
-      </view>
-      <t-icon name="chevron-right" size="32rpx" color="#f8c44f" />
-    </view>
-    <view class="battle-grid">
-      <view
-        wx:for="{{hotBattles}}"
-        wx:key="label"
-        class="battle-card"
-        data-value="{{item.query}}"
-        bindtap="onHotBattleTap"
-      >
-        <view class="battle-label">{{item.label}}</view>
-        <view class="battle-tone">{{item.tone}}</view>
-      </view>
-    </view>
-  </view>
-
-  <view class="search-panel">
-    <view class="panel-head">
-      <view>
-        <view class="section-kicker">自定义黑点</view>
-        <view class="panel-title">输入一句，对线系统自动拆</view>
-      </view>
-      <t-tag theme="primary" variant="outline" shape="round">本地兜底</t-tag>
-    </view>
-    <view class="input-shell">
+  <!-- 主输入区（第一屏视觉焦点） -->
+  <view class="composer">
+    <view class="composer-hint">把对方那句话粘进来</view>
+    <view class="composer-shell">
       <textarea
-        class="query-input"
-        placeholder="例如：8分 / 米奇冠军 / 靠身体没技术 / 科比五冠 / Excel詹"
+        class="composer-input"
+        placeholder="例如：他8分释兵权"
+        placeholder-class="composer-placeholder"
         value="{{query}}"
         bindinput="onInput"
         maxlength="120"
         auto-height
+        cursor-color="#552583"
       />
     </view>
-    <view class="primary-actions">
-      <t-button class="action-primary" theme="primary" block shape="round" bindtap="onGenerate">
-        <t-icon name="search" size="30rpx" color="#170826" />
-        <text>生成反驳</text>
-      </t-button>
-      <t-button class="action-random" theme="default" variant="outline" shape="round" bindtap="onRandom">随机一条</t-button>
-    </view>
-  </view>
 
-  <view class="quick-section">
-    <view class="tool-title">高频黑点</view>
-    <view class="quick">
-      <t-tag
-        wx:for="{{quickInputs}}"
-        wx:key="*this"
-        class="quick-chip"
-        theme="warning"
-        variant="light"
+    <view class="composer-actions">
+      <t-button
+        class="cta-primary"
+        theme="primary"
+        block
         shape="round"
-        data-value="{{item}}"
-        bindtap="onQuickTap"
-      >{{item}}</t-tag>
+        bindtap="onGenerate"
+      >
+        <text class="cta-primary-text">生成反驳</text>
+      </t-button>
+      <view class="cta-random" bindtap="onRandom">
+        <t-icon name="refresh" size="32rpx" color="#552583" />
+      </view>
     </view>
   </view>
 
-  <scroll-view class="category-scroll" scroll-x enable-flex>
+  <!-- 风格切换（mood）：轻量 chip 行，保留 handler -->
+  <view class="mood-row">
     <view
-      wx:for="{{categoryFilters}}"
-      wx:key="name"
-      class="category-chip {{activeCategory === item.name ? 'active' : ''}}"
-      data-category="{{item.name}}"
-      bindtap="onCategoryTap"
-    >
-      <text>{{item.name}}</text>
-      <text class="category-count">{{item.count}}</text>
-    </view>
-  </scroll-view>
-
-  <view wx:if="{{isCategoryFiltered}}" class="filter-status">
-    <view>
-      <view class="filter-title">正在浏览：{{activeCategory}}</view>
-      <view class="filter-sub">分类弹药库已展开，随时回到当前搜索。</view>
-    </view>
-    <t-button class="clear-filter-btn" theme="warning" size="small" shape="round" bindtap="onClearCategory">回到搜索</t-button>
-  </view>
-
-  <view wx:if="{{results.length}}" class="toolbar">
-    <view>
-      <view class="toolbar-title">命中 {{results.length}} 张拆解卡</view>
-      <view class="toolbar-sub">当前分类：{{activeCategory}} · 当前模式：{{activeMoodLabel}}</view>
-    </view>
-    <view class="toolbar-actions">
-      <t-button class="copy-first-btn" data-index="0" data-field="short_reply" data-title="已复制首条" theme="primary" size="small" shape="round" bindtap="copyReplyField">短刀</t-button>
-      <t-button class="copy-first-btn" data-index="0" data-field="one_liner" data-title="已复制首条" theme="warning" size="small" shape="round" bindtap="copyReplyField">封口</t-button>
-      <t-button class="copy-all-btn" theme="danger" size="small" shape="round" bindtap="copyAll">全部</t-button>
-    </view>
-  </view>
-
-  <view wx:if="{{results.length}}" class="results">
-    <view
-      wx:for="{{results}}"
-      wx:key="resultKey"
-      class="result-card gold-rim"
-      data-index="{{index}}"
-      bindlongpress="onShareCardLongPress"
-    >
-      <view class="meta-row">
-        <view class="meta-left">
-          <t-tag theme="warning" variant="light" shape="round">{{item.category}}</t-tag>
-          <text class="alias">命中：{{item.alias}}</text>
-        </view>
-        <view class="card-actions">
-          <view
-            class="fav-star {{item.isFavorited ? 'active' : ''}}"
-            data-index="{{index}}"
-            catchtap="onToggleFavorite"
-          >{{item.isFavorited ? '★' : '☆'}}</view>
-          <t-button
-            class="enhance-btn"
-            theme="primary"
-            size="small"
-            shape="round"
-            data-index="{{index}}"
-            bindtap="onEnhanceReply"
-            loading="{{item.isEnhancing}}"
-            disabled="{{item.isEnhancing}}"
-          >{{item.isEnhancing ? '生成中' : 'AI增强'}}</t-button>
-          <t-button class="copy-card-btn" theme="default" variant="outline" size="small" shape="round" data-index="{{index}}" bindtap="copyCard">整张</t-button>
-        </view>
-      </view>
-
-      <view class="claim-box">
-        <view class="claim-label">对方话术</view>
-        <view class="claim">{{item.card.claim}}</view>
-      </view>
-
-      <view class="hit-reply lakers-glow">
-        <view class="hit-label">先回这句</view>
-        <view class="hit-text">{{item.card.short_reply}}</view>
-        <t-button class="hit-copy" theme="primary" size="small" shape="round" data-index="{{index}}" data-field="short_reply" bindtap="copyReplyField">一键复制</t-button>
-      </view>
-
-      <view class="copy-strip">
-        <t-button class="mini-copy-btn {{activeMood === 'short_reply' ? 'hot' : ''}}" data-index="{{index}}" data-field="short_reply" theme="primary" size="small" shape="round" bindtap="copyReplyField">短刀</t-button>
-        <t-button class="mini-copy-btn {{activeMood === 'one_liner' ? 'hot' : ''}}" data-index="{{index}}" data-field="one_liner" theme="warning" size="small" shape="round" bindtap="copyReplyField">封口</t-button>
-        <t-button class="mini-copy-btn {{activeMood === 'long_reply' ? 'hot' : ''}}" data-index="{{index}}" data-field="long_reply" theme="default" variant="outline" size="small" shape="round" bindtap="copyReplyField">长拆</t-button>
-        <t-button class="mini-copy-btn {{activeMood === 'video_script' ? 'hot' : ''}}" data-index="{{index}}" data-field="video_script" theme="default" variant="outline" size="small" shape="round" bindtap="copyReplyField">口播</t-button>
-      </view>
-
-      <view class="expand-toggle" data-index="{{index}}" bindtap="toggleExpand">
-        <text>{{item.expanded ? '收起详情' : '查看详情（长拆 / 封口 / 口播）'}}</text>
-      </view>
-
-      <view wx:if="{{item.card.tags && item.card.tags.length}}" class="tags">
-        <t-tag wx:for="{{item.card.tags}}" wx:key="*this" class="tag" theme="primary" variant="light" shape="round">{{item}}</t-tag>
-      </view>
-
-      <t-divider content="逻辑拆解" />
-
-      <view class="logic-grid">
-        <view class="logic-item">
-          <view class="logic-label">可承认事实</view>
-          <view class="logic-text">{{item.card.valid_part}}</view>
-        </view>
-        <view class="logic-item">
-          <view class="logic-label">逻辑漏洞</view>
-          <view class="logic-text">{{item.card.logic_flaw}}</view>
-        </view>
-        <view class="logic-item wide">
-          <view class="logic-label">同标准回旋镖</view>
-          <view class="logic-text">{{item.card.comparison}}</view>
-        </view>
-      </view>
-
-      <block wx:if="{{item.expanded}}">
-        <view class="section">
-          <view class="section-title">长线拆解</view>
-          <view class="reply">{{item.card.long_reply}}</view>
-        </view>
-
-        <view class="section compact">
-          <view class="section-title">一句话封口</view>
-          <view class="one-liner">{{item.card.one_liner}}</view>
-        </view>
-
-        <view class="section">
-          <view class="section-title">视频口播版</view>
-          <view class="reply">{{item.card.video_script}}</view>
-        </view>
-
-        <block wx:if="{{item.extendedDetail}}">
-          <view wx:if="{{item.extendedDetail.events.length}}" class="section">
-            <view class="section-title">📅 事件时间线</view>
-            <view wx:for="{{item.extendedDetail.events}}" wx:key="title" wx:for-item="ev" class="ext-event">
-              <text class="ext-year">{{ev.year}}</text>
-              <view class="ext-event-body">
-                <view class="ext-event-title">{{ev.title}}</view>
-                <view class="ext-event-summary">{{ev.summary}}</view>
-              </view>
-            </view>
-          </view>
-
-          <view wx:if="{{item.extendedDetail.data.length}}" class="section">
-            <view class="section-title">📊 关键数据</view>
-            <view wx:for="{{item.extendedDetail.data}}" wx:key="label" wx:for-item="d" class="ext-data-row">
-              <text class="ext-data-label">{{d.label}}</text>
-              <text class="ext-data-value">{{d.value}}</text>
-              <text class="ext-data-source">{{d.source}}</text>
-            </view>
-          </view>
-
-          <view wx:if="{{item.extendedDetail.causes.length}}" class="section">
-            <view class="section-title">🔎 成因分析</view>
-            <view wx:for="{{item.extendedDetail.causes}}" wx:key="*this" wx:for-item="c" class="ext-cause">{{c}}</view>
-          </view>
-
-          <view wx:if="{{item.extendedDetail.background}}" class="section">
-            <view class="section-title">🌍 时代背景</view>
-            <view class="reply">{{item.extendedDetail.background}}</view>
-          </view>
-
-          <view wx:if="{{item.extendedDetail.analysis}}" class="section">
-            <view class="section-title">🎯 专业拆解</view>
-            <view class="reply">{{item.extendedDetail.analysis}}</view>
-          </view>
-        </block>
-      </block>
-
-      <view wx:if="{{item.card.facts && item.card.facts.length}}" class="facts">
-        <view class="facts-title">事实点</view>
-        <view wx:for="{{item.card.facts}}" wx:key="*this" class="fact-row">• {{item}}</view>
-      </view>
-    </view>
-  </view>
-
-  <view wx:else class="empty-state">
-    <view class="empty-title">这枪还没装弹</view>
-    <view class="empty-sub">输入一个黑点，或者点上面的热梗直接出弹药。</view>
-  </view>
-
-  <view class="menu-grid">
-    <view
-      wx:for="{{menuEntries}}"
+      wx:for="{{moodTabs}}"
       wx:key="id"
-      class="menu-entry"
-      data-url="{{item.url}}"
+      class="mood-chip {{activeMood === item.id ? 'mood-chip-active' : ''}}"
+      data-mood="{{item.id}}"
+      bindtap="onMoodTap"
+    >{{item.name}}</view>
+  </view>
+
+  <!-- 热梗快捷入口：水平滚动 chip -->
+  <view class="hot-block">
+    <view class="hot-label">常见黑点</view>
+    <scroll-view class="hot-scroll" scroll-x enable-flex>
+      <view
+        wx:for="{{hotBattles}}"
+        wx:key="label"
+        class="hot-chip"
+        data-value="{{item.query}}"
+        bindtap="onHotBattleTap"
+      >{{item.label}}</view>
+    </scroll-view>
+  </view>
+
+  <!-- 段位/收藏/历史：底部精简导航 -->
+  <view class="nav-row">
+    <view
+      class="nav-item"
+      data-url="/pages/favorites/favorites"
       bindtap="onMenuTap"
     >
-      <view class="menu-emoji">{{item.emoji}}</view>
-      <view class="menu-label">{{item.label}}</view>
+      <view class="nav-icon">★</view>
+      <text class="nav-text">收藏</text>
+    </view>
+    <view
+      class="nav-item"
+      data-url="/pages/history/history"
+      bindtap="onMenuTap"
+    >
+      <view class="nav-icon">↻</view>
+      <text class="nav-text">历史</text>
+    </view>
+    <view
+      class="nav-item"
+      data-url="/pages/daily/daily"
+      bindtap="onMenuTap"
+    >
+      <view class="nav-icon">·</view>
+      <text class="nav-text">每日</text>
+    </view>
+    <view
+      class="nav-item"
+      data-url="/pages/leaderboard/leaderboard"
+      bindtap="onMenuTap"
+    >
+      <view class="nav-icon">#</view>
+      <text class="nav-text">榜单</text>
     </view>
   </view>
 
   <view class="footer-note">
-    <text class="footer-text">练手项目 · v2.1 · </text>
-    <text class="footer-link" data-url="/pages/privacy/privacy" bindtap="onMenuTap">隐私政策</text>
+    <text class="footer-text">v2.6 · </text>
+    <text class="footer-link" data-url="/pages/privacy/privacy" bindtap="onMenuTap">隐私</text>
   </view>
-
-  <!-- 分享卡片画布（隐藏） -->
-  <canvas
-    wx:if="{{shareCanvasVisible}}"
-    canvas-id="shareCanvas"
-    class="share-canvas"
-    style="width: 750rpx; height: 1334rpx;"
-  ></canvas>
 
 </view>
