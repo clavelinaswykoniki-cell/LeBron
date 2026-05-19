@@ -9,7 +9,7 @@
   },
   "compileType": "miniprogram",
   "libVersion": "latest",
-  "appid": "touristappid",
+  "appid": "wx4149096d52486020",
   "projectname": "lebron-rebuttal-miniapp",
   "miniprogramRoot": "miniprogram/",
   "cloudfunctionRoot": "cloudfunctions/"

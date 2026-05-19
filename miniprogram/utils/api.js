@@ -19,7 +19,7 @@
  *   )
  */
 
-const DEFAULT_BASE_URL = "http://localhost:3000"
+const DEFAULT_BASE_URL = "https://express-5hpi-259564-8-1434513466.sh.run.tcloudbase.com"
 const BASE_URL_STORAGE_KEY = "lbr_api_base_url"
 const DEFAULT_TIMEOUT_MS = 5000
 
