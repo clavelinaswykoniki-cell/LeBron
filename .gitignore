@@ -16,3 +16,6 @@ server/.claude/
 
 # 微信开发者工具个人偏好（每人本地独立）
 project.private.config.json
+
+# Devil's Advocate critique logs（本地工具，不进仓库）
+.devils-advocate/

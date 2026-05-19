@@ -95,6 +95,7 @@ npm start              # 启动 Express API（备案后用）
 | `POST /api/llm/enhance`（DeepSeek 代理，移植 cloudfunctions/generateReply） | ✅ 代码完，等真实 model ID 跑真实联调 |
 | 后端 10/10 smoke test | ✅（详见 server/test-api.sh） |
 | 前端 utils/api.js（wx.request 封装 + 超时 + 降级） | ✅ |
+| 前端 utils/api.js v2.10 切 wx.cloud.callContainer（绕过 HTTPS 白名单/备案） | ✅ |
 | 前端 utils/userProfile.js（伪 openid + nickname/avatar 存取） | ✅ |
 | 前端 duel.js: fetchLeaderboard async + submitMatch fire-and-forget | ✅ |
 | 前端 leaderboard 页面：loading + error + fromServer 提示 | ✅ |
@@ -148,6 +149,18 @@ npm start              # 启动 Express API（备案后用）
 
 4 张表：`users`, `leaderboard`, `match_records`, `checkins`
 详见 `server/sql/001_init.sql`，全部 `CREATE TABLE IF NOT EXISTS`，幂等可重复执行。
+
+## v2.10 云调用约束（重要）
+
+- `wx.cloud.callContainer` 要求基础库 ≥2.13.0（微信 ≥7.0.0），覆盖 99%+ 活跃用户但**不是 100%**。
+- `utils/api.js` 在云调用不可用时 fallback 到 `wx.request` + `DEFAULT_BASE_URL = *.sh.run.tcloudbase.com`，但**这个 URL 在生产环境被微信拒收**——所以 fallback 路径仅适用于：
+  1. Node 单测（无 wx 对象）
+  2. 开发者工具内的本地 mock
+  3. `opts.forceHttp` 显式切换
+- 真实生产用户基础库 <2.13.0 时，console.warn 提示用户升级微信；UI 层没有 modal 弹窗（避免每次启动都骚扰）。
+- 后端 `server/server.js` 用 `cors()` 默认配置——`callContainer` 不发 Origin 头，CORS 中间件 no-op 通过，不影响 Express 路由匹配。
+- 文件位置：`miniprogram/app.js`（`wx.cloud.init`），`miniprogram/utils/api.js`（双模式 dispatcher）
+- 测试：`npm run test:api-cloud`（8/8 mock 覆盖 cloud-mode 契约）
 
 ## 首页 UI P0/P1 复盘（2026-05-18 审查后）
 
