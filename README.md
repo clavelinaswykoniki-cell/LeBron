@@ -44,7 +44,7 @@ graph LR
 ## 技术亮点
 
 **1. Prompt 工程 + 对抗测试套件**
-`scripts/test-prompt-adversarial.js` 离线覆盖 10 类攻击面：prompt injection / 角色覆写 / 篮球包装非篮球话题 / 模板化金句 / 极端长短输入 / 主动黑别人引导，dry-run 不烧 DeepSeek token。<!-- VERIFY: HANDOFF 提到的「v2.8.5 6 轮迭代」具体迭代日志在仓库里没找到证据，明天 review -->
+v2.8 → v2.8.5 共 6 版迭代（详见 [`docs/PROMPT_VERSIONS.md`](./docs/PROMPT_VERSIONS.md)），逐版加固防侮辱性人身攻击 / 防编造精确数字 / 防金句模板化 / 防滑坡主动黑别人 / 防 prompt injection；`scripts/test-prompt-adversarial.js` 离线 dry-run 10 类攻击面，不烧 DeepSeek token。
 
 **2. 双模式 API 调度（`miniprogram/utils/api.js`）**
 `wx.cloud.callContainer` 优先 + `wx.request` HTTPS fallback，`BASE_URL` 通过 `wx.storage` 做远程 kill switch（线上可一键切回本地 mock），5s 超时统一，Node 单测无 `wx` 对象也能跑（`scripts/test-api-cloud.js`）。

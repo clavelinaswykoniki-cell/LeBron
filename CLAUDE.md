@@ -26,16 +26,16 @@ Priority is:
 - strong short-form rebuttal
 - stable local fallback
 - safe CloudBase handoff for AI enhancement
-- 后端接入阿里云 ECS + RDS PostgreSQL（进行中）
+- 后端：微信云托管 + MySQL（v2.6+ 已上线，wx.cloud.callContainer 直连）
 
 ## Current Structure
 
 - `miniprogram/data/`: cards, aliases, categories, corpus, extended
 - `miniprogram/utils/`: normalize, match, llm provider, prompt builder, duel, daily, safety
-- `miniprogram/pages/`: 12 pages (index, result, about, easter, quiz, privacy, history, favorites, onboarding, leaderboard, pk, daily)
-- `cloudfunctions/generateReply/`: CloudBase AI enhance path
+- `miniprogram/pages/`: 14 pages (index, result, about, easter, quiz, privacy, history, favorites, onboarding, leaderboard, pk, daily, chat, meme)
+- `cloudfunctions/generateReply/`: 旧 CloudBase 云函数（v2.6+ 已被后端 `/api/llm/enhance` 替代，保留作 fallback）
 - `scripts/`: syntax, match, corpus, fallback, duel tests
-- `server/`: 后端 API 骨架（Node.js + Express + pg），见下方「Server / RDS 接入」
+- `server/`: 后端（Node.js + Express + mysql2），跑在微信云托管，见下方「Server / 微信云托管」
 - `docs/context-compact.md`: short current-state handoff for future agents
 
 ## Current Constraints
@@ -43,20 +43,20 @@ Priority is:
 - Keep edits inside `lebron-rebuttal-miniapp` only
 - Do not touch backend projects outside this directory
 - Real API keys / passwords / AccessKey must NEVER be committed or sent to chat
-- `.env` files are gitignored — credentials only live in local `.env` and ECS server
+- `.env` files are gitignored — credentials only live in local `.env` and 微信云托管环境变量
 - CloudBase failure must always fall back to local cards
 - Black terms can be used as aliases, not as proactive abusive output
 - Start from `docs/context-compact.md` before reading large data files
 
-## Current Baseline (v2.5)
+## Current Baseline (v2.10.1 — 提交微信审核中 2026-05-20)
 
 - 215 local rebuttal cards (base 100 + extra 7 + docx 50 + v2.1 15 + stars 15 + starsV2a/b 15+6 + legends 7)
 - 730 aliases
 - 67 extended card details (5 sources merged in arsenal.js)
-- 12 pages registered in app.json
+- 14 pages registered in app.json（含 v2.6+ 新增 chat 和 meme）
 - local matching working
-- AI enhance path scaffolded
-- PK 段位 / leaderboard / daily check-in pages built (mock data, pending backend)
+- AI enhance：v2.10 起走 `wx.cloud.callContainer → /api/llm/enhance → DeepSeek V4 Flash`，CloudBase 云函数作为 legacy fallback 保留
+- PK 段位 / leaderboard / daily check-in：前端 + 后端全链路通，数据走云托管 MySQL（4 张表事务）
 
 ## Commands
 
@@ -71,49 +71,33 @@ npm run test:ai-fallback
 Server commands:
 ```bash
 cd server
-npm run test:connect   # 验证 RDS 连接（需要先填 .env）
-npm start              # 启动 Express API（备案后用）
+npm run test:connect   # 验证 MySQL 连接（先填 .env 的 MYSQL_*）
+npm start              # 本地启动 Express（默认端口 80，云托管要求）
 ```
 
-## Server / RDS 接入（v2.6 已完成本地链路）
+## Server / 微信云托管（v2.6 上线 / v2.10 切 callContainer）
 
-### 进度
+### 当前架构
 
-| 步骤 | 状态 |
-|---|---|
-| server/ 目录骨架 (server.js, db.js, routes/, sql/001_init.sql) | ✅ |
-| server/ 依赖（express, pg, cors, dotenv） | ✅ |
-| .gitignore 加 .env / .env.save / lebron rds 保护 | ✅ |
-| server/.env 填 PG_* + DEEPSEEK_* | ✅（PG_PASSWORD + DEEPSEEK_API_KEY 都已泄露过，需 rotate） |
-| `npm run test:connect` 连接验证 | ✅（PG 18.3） |
-| 执行 sql/001_init.sql 建 4 张表 + seed | ✅（users / leaderboard / match_records / checkins） |
-| SQL schema 对齐前端：`platinum` → `diamond` | ✅ |
-| Express API skeleton (server.js + db.js + 段位 helper) | ✅ |
-| `GET /api/leaderboard` | ✅ |
-| `POST /api/pk/submit`（事务，UPSERT user + leaderboard + match_records） | ✅ |
-| `POST /api/daily/checkin`（同日去重 + streak 累计） | ✅ |
-| `POST /api/llm/enhance`（DeepSeek 代理，移植 cloudfunctions/generateReply） | ✅ 代码完，等真实 model ID 跑真实联调 |
-| 后端 10/10 smoke test | ✅（详见 server/test-api.sh） |
-| 前端 utils/api.js（wx.request 封装 + 超时 + 降级） | ✅ |
-| 前端 utils/api.js v2.10 切 wx.cloud.callContainer（绕过 HTTPS 白名单/备案） | ✅ |
-| 前端 utils/userProfile.js（伪 openid + nickname/avatar 存取） | ✅ |
-| 前端 duel.js: fetchLeaderboard async + submitMatch fire-and-forget | ✅ |
-| 前端 leaderboard 页面：loading + error + fromServer 提示 | ✅ |
-| 前端 llmProvider.js 从 CloudBase 切到 HTTP /api/llm/enhance | ✅ |
-| 买域名 (.cn ~30 元) + ICP 备案 | ❌ **等用户**，备案 7-20 天 |
-| ECS 装环境 (Node 18 / Nginx / PM2 / certbot) | ⏳ 等备案 |
-| 真机扫码 + HTTPS | ⏳ 等备案 |
-| onboarding 加 step 5 选头像/昵称 | ⏳ Day 2 |
-| 梗图工厂 + 段位升级动画 | ⏳ Day 3-4 |
-| 录 demo + 写 README/PORTFOLIO_HIGHLIGHTS | ⏳ Day 13 |
+- **运行环境**：微信云托管（Cloud Run），服务名 `express-fjva`，环境 ID `prod-d1go3yaske515bdb7`
+- **数据库**：云托管内置 MySQL（`mysql2/promise` pool，utf8mb4），通过 `MYSQL_ADDRESS=host:port` 环境变量注入
+- **前端调用**：v2.10 起 `wx.cloud.callContainer` 优先，`wx.request` HTTPS fallback 仅用于 Node 单测 / 开发者工具 mock / `forceHttp` 调试
+- **DeepSeek**：通过后端 `/api/llm/enhance` 代理调用，key 锁在云托管环境变量
+- **CloudBase 云函数**（`cloudfunctions/generateReply/`）：v2.6 起被 HTTP API 替代，作为 legacy fallback 保留
 
-### 已知泄露凭证（用户已决定继续使用，agent 不要再主动提醒 rotate）
+### API 端点（5 个）
 
-**2026-05-19 用户明确决定**：免费个人测试项目，接受继续使用现密码。Agent 不要再主动建议 rotate 或唠叨安全风险。如果用户**自己**说要 rotate，再走 `/secret-rotate` skill。
+| 路由 | 方法 | 文件 |
+|---|---|---|
+| `/api/leaderboard` | GET | `server/routes/leaderboard.js` |
+| `/api/pk/submit` | POST | `server/routes/pk.js`（事务：UPSERT user + leaderboard + match_records） |
+| `/api/daily/checkin` | POST | `server/routes/daily.js`（同日去重 + streak 累计） |
+| `/api/llm/enhance` | POST | `server/routes/llm.js`（DeepSeek V4 Flash 代理 + 对抗 prompt） |
+| `/api/chat/*` | POST | `server/routes/chat.js`（v2.9 新增 chat 模式） |
 
-1. `PG_PASSWORD` = `<redacted-in-local-env>`（也存在于 `~/.claude.json` 的 postgres MCP 配置里）
-2. `DEEPSEEK_API_KEY` = `<redacted-in-local-env>`
-3. 残留泄露文件 `server/lebron rds` 和 `server/.env.save` 含明文密码
+### 数据库（4 张 MySQL 表）
+
+`users` / `leaderboard` / `match_records` / `checkins`，schema 见 `server/sql/001_init.sql`（`CREATE TABLE IF NOT EXISTS`，幂等可重复执行）。`.env` 模板见 `server/.env.example`。
 
 ### 段位 enum（前后端必须一致）
 
@@ -125,30 +109,29 @@ npm start              # 启动 Express API（备案后用）
 | 1000 | diamond | 钻石詹蜜 |
 | 1800 | king | 王者詹皇 |
 
-前端权威定义：`miniprogram/utils/duel.js:25` 和 `progression.js:20`；后端：`server/db.js:RANK_TIERS` + `001_init.sql` CHECK 约束。
+前端权威定义：`miniprogram/utils/duel.js`、`miniprogram/utils/progression.js`；后端：`server/db.js:RANK_TIERS` + `server/sql/001_init.sql` 的 CHECK 约束。任何一处改动跑 `.claude/skills/rank-tier-sync` 核对 5 个权威点。
 
-### 阿里云资源
+### 已知泄露凭证（用户已决定继续使用，agent 不要再主动提醒 rotate）
 
-- **ECS**: 39.107.192.89（纯净，未装任何环境）
-- **RDS PostgreSQL 外网**: `pgm-bp185z0tt2z005n7mo.pg.rds.aliyuncs.com:5432`
-- **RDS PostgreSQL 内网**: `pgm-bp185z0tt2z005n7.pg.rds.aliyuncs.com:5432`（上 ECS 后用这个）
-- **RDS 账号**: `lebron_api` / 数据库: `lebron`
-- **VPC**: vpc-bp1gv05b26tfv6mkhuwxg, 网段 172.16.0.0/12
+**2026-05-19 用户明确决定**：免费个人测试项目，接受继续使用现密码。Agent 不要再主动建议 rotate 或唠叨安全风险。如果用户**自己**说要 rotate，再走 `/secret-rotate` skill。
+
+1. `DEEPSEEK_API_KEY` = `<redacted-in-local-env>`（云托管环境变量 + 本地 `server/.env`）
+2. 旧 `PG_PASSWORD` 曾在阿里云 RDS 时期泄露过；v2.6 已切换到云托管 MySQL，PG 资源**已废弃**，但旧密码若在 `~/.claude.json` postgres MCP 配置里仍残留，需要时由用户自行清理
+3. 残留泄露文件 `server/lebron rds` 和 `server/.env.save` 含旧明文密码（已 gitignored，但本地仍存在）
 
 ### 下一步操作（给 Claude Code CLI）
 
-当用户说「继续接 RDS」或「继续后端」时，按此顺序：
+当用户说「继续后端」或「跑后端联调」时，按此顺序：
 
-1. 确认 `server/.env` 里 PG_PASSWORD 是否已填（不是 `__FILL_YOUR_PASSWORD_HERE__`）
-2. 跑 `cd server && npm run test:connect`
-3. 如果连接成功但没表 → 提示用户用 GUI 执行 `server/sql/001_init.sql`
-4. 如果连接成功且有表 → 开始写 Express API 路由
+1. 确认 `server/.env` 里 `MYSQL_*` + `DEEPSEEK_API_KEY` 是否已填
+2. 跑 `cd server && npm run test:connect`（验证 MySQL 连接）
+3. 如果连接成功但没表 → 提示用户在云托管 MySQL 管理界面粘贴 `server/sql/001_init.sql`
+4. 如果跑 smoke：`./server/test-api.sh`（9 步基础回归，`--include-llm` 跑真实 DeepSeek 联调消耗 token）
 5. **绝不要让用户把密码/AccessKey 发到对话里**
 
-### 数据库表结构 (server/sql/001_init.sql)
+### 历史背景（v2.6 之前，已废弃）
 
-4 张表：`users`, `leaderboard`, `match_records`, `checkins`
-详见 `server/sql/001_init.sql`，全部 `CREATE TABLE IF NOT EXISTS`，幂等可重复执行。
+v2.5 及之前曾计划部署到阿里云 ECS + RDS PostgreSQL（含 ICP 备案、Nginx、PM2、certbot）。v2.6 直接迁到微信云托管后，阿里云资源全部弃用，PostgreSQL 相关代码（`pg` driver / `PG_*` 环境变量）已移除。如在仓库或老 doc 里看到 ECS / RDS / PG / 备案 字样，那是旧记录，以本节为准。
 
 ## v2.10 云调用约束（重要）
 
