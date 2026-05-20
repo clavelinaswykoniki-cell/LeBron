@@ -1,5 +1,7 @@
 # 「问 AI」聊天功能 — 实施计划
 
+> **状态：v2.9 已实施（commit `e601d60` "v2.9 multi-agent sweep: UI + perf + chat MVP"）。** 本文档是实施前的计划草稿，保留作设计取舍记录。当前 chat 入口已上线：`miniprogram/pages/chat/` + `server/routes/chat.js`。
+
 > 决策时间：2026-05-19 凌晨
 > 上下文：用户在打磨 prompt 时反馈 "AI 增强太慢、不够犀利、想做对话式交互 + 配额限制"
 > 当前 prompt 已迭代到 v2.8.4，但本质需要把"按钮一键调用"升级成"多轮对话式"

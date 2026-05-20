@@ -20,12 +20,14 @@
 
 | 维度 | 数量 |
 |---|---|
-| 反驳卡总数 | **175+ 张**（v2.1 新增 5 黑点 + 20 球星对比） |
-| 短梗 / 别名 / 黑称映射 | **500+ 条** |
+| 反驳卡总数 | **215 张**（base 100 + extra 7 + docx 50 + v2.1 15 + stars 21 + legends 7 + v2.5 15） |
+| 短梗 / 别名 / 黑称映射 | **730 条** |
 | 争议分类 | **46 类** |
 | 深度素材卡 | **10 张**（含 events / data / causes / background / analysis 五维结构） |
-| 独立页面 | **8 个**（home / about / quiz / easter / privacy / history / favorites / onboarding） |
-| 自动化测试 | **8 个**（CI 5 + utils 单元 3） |
+| 独立页面 | **14 个**（index / result / about / easter / quiz / privacy / history / favorites / onboarding / leaderboard / pk / daily / chat / meme） |
+| 自动化测试 | **前端 12 个 + 后端 9 步 curl smoke**（GitHub Actions matrix: Node 18 + 20） |
+| 后端 API | **5 个**（leaderboard / pk/submit / daily/checkin / llm/enhance / chat） |
+| 数据库 | **MySQL 4 张表**（云托管内置） |
 
 ---
 
@@ -62,31 +64,30 @@
 
 ## 技术亮点
 
-### 完全本地化
-- 无后端，无数据库依赖
-- 本地匹配 + 别名表 + fallback 三级回退
-- 反驳卡 / 别名 / 分类全部打包进小程序，离线可用
+### 本地优先 + 全栈兜底
+- 215 反驳卡 / 730 别名 / 46 分类全部打包进小程序，**完全离线可用**
+- 双模式 API 调度：`wx.cloud.callContainer` 优先 + `wx.request` HTTPS fallback + 本地 mock 兜底
+- 任何网络调用失败都降级到本地卡，用户感知是「网络慢」不是「崩了」
 
-### 可选 AI 增强
-- CloudBase 云函数 `generateReply`
-- 接 DeepSeek v4-flash
-- 任何失败（key 缺失 / 网络 / 限流 / 超时）都自动 fallback 到本地卡
-- 用户感知零差异
+### 全栈架构（v2.6+）
+- 后端：Node 18 + Express 4，部署微信云托管（服务名 `express-fjva`）
+- 数据库：MySQL（云托管内置）4 张表，PK 提交走事务
+- AI 增强：DeepSeek V4 Flash 通过 `POST /api/llm/enhance` 后端代理，**API key 永不出客户端**
+- v2.10 起 `wx.cloud.callContainer` 直连云托管，零域名 + 零 ICP 备案
 
-### 零新依赖
-- 原生微信小程序 + TDesign Mini-Program
+### 零新依赖（前端）
+- 原生微信小程序 + TDesign Mini-Program 1.14
 - 无 Taro / 无 uni-app / 无 webpack / 无 vite
 - 无构建步骤，导入即跑
 
 ### 测试覆盖
-- 8 个自动化测试
-- GitHub Actions CI 跑 5 个核心
-- syntax / match / corpus / fallback / progression / safety / feedback / matchquery
+- 前端 12 个 npm scripts：syntax / match / corpus / ai-fallback / progression / safety / feedback / matchquery / storage / duel / prompt / api-cloud
+- 后端 9 步 curl smoke（`server/test-api.sh`，可选 DeepSeek 真实联调）
+- GitHub Actions matrix（Node 18 + 20）每次 push / PR 自动跑
 
-### devils-advocate 自审
-- **19/20+ PASS**（含安全 / 性能 / 架构 / 内容合规四维）
-- 每次大版本完成后强制跑一遍 `/devils-advocate:critique`
-- 失败项必须修或文档化为已知限制
+### Prompt 工程
+- v2.8 → v2.8.5 共 6 版迭代（详见 `docs/PROMPT_VERSIONS.md`）
+- `scripts/test-prompt-adversarial.js` 10 类离线对抗 dry-run（prompt injection / 角色覆写 / 模板化金句等），不烧 DeepSeek token
 
 ---
 
@@ -115,11 +116,11 @@
 
 ### 推特 / Twitter（280 字符）
 
-> 詹黑逻辑拆解器：微信小程序，把评论区黑 LeBron 的话术（"8 分释兵权""Excel 球王""米奇冠军"）拆成结构化反驳卡。175 张本地反驳卡，559 条别名匹配。零新依赖，原生小程序 + TDesign。GitHub: github.com/clavelinaswykoniki-cell/LeBron
+> 詹黑逻辑拆解器：微信小程序，把评论区黑 LeBron 的话术（"8 分释兵权""Excel 球王""米奇冠军"）拆成结构化反驳卡。215 反驳卡 / 730 别名 / 14 页面 / 全栈（Express + MySQL + DeepSeek，部署微信云托管）。GitHub: github.com/clavelinaswykoniki-cell/LeBron
 
 ### 微博（140 字以内）
 
-> 詹黑逻辑拆解器：一个把 LeBron 詹黑话术拆成结构化反驳的微信小程序。输入黑点 → 自动匹配反驳卡 → 一键复制怼回去。175 张反驳卡 / 559 别名 / 46 分类。练手项目，GitHub 开源。
+> 詹黑逻辑拆解器：一个把 LeBron 詹黑话术拆成结构化反驳的微信小程序。输入黑点 → 自动匹配反驳卡 → 一键复制怼回去。215 张反驳卡 / 730 别名 / 46 分类。练手项目，GitHub 开源。
 
 ### 即刻 / 朋友圈
 
@@ -129,8 +130,8 @@
 >
 > 解法：把这些黑点全做成结构化反驳卡（短刀 / 封口 / 长拆 / 口播 4 种模式），输入秒出，一键复制。
 >
-> 数据：175 反驳卡 / 559 别名 / 46 分类 / 8 测试 / GitHub Actions CI。
+> 数据：215 反驳卡 / 730 别名 / 46 分类 / 14 页面 / 4 表 / 5 API / 12 测试 / GitHub Actions CI。
 >
-> 技术：原生小程序 + TDesign，零新依赖。可选 AI 增强（DeepSeek）。
+> 技术：原生小程序 + TDesign + Express + MySQL 全栈，部署微信云托管，DeepSeek 增强反驳通过后端代理（key 不进前端）。
 >
 > GitHub: github.com/clavelinaswykoniki-cell/LeBron

@@ -1,5 +1,7 @@
 # CloudBase + DeepSeek 接入计划
 
+> **DEPRECATED（v2.6+）** — 本文档是 v2.5 之前的 CloudBase 云函数方案规划，**已被取代**。当前实现走 `wx.cloud.callContainer → Express on 微信云托管 → /api/llm/enhance → DeepSeek V4 Flash`。`cloudfunctions/generateReply/` 保留作 legacy fallback。当前架构见 `docs/context-compact.md` 的 Current Stack 章节。本文档保留作历史记录。
+
 第一版只做本地语料库。DeepSeek/豆包 API Key 不能放进小程序前端。
 
 ## 阶段 2 结构
